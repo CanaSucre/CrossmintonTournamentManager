@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" type="text/css" href="/css/panel.css" />
+
+  <title>Panel Stream</title>
+</head>
+
+<body>
+  <header>
+    <h1 id="title">Panel de Stream : Loading...</h1>
+    <p id="date">- Loading... -</p>
+  </header>
+
+  <main>
+    <div class="part1">
+      <section id="managePhonesSection" class="mainblock">
+        <h3>Répartiteur des Matchs</h3>
+
+        <article id="floorsSection">
+
+        </article>
+      </section>
+
+      <div class="mainblock" id="secondPart">
+        <section id="manageMessage">
+
+          <div>
+            <h3>Message</h3>
+            <input type="text" id="messageContent" name="messageContent" placeholder="Contenu du message" />
+          </div>
+
+          <div>
+            <h3>Durée (en secondes)</h3>
+            <input type="number" id="messageDuration" name="messageDuration" />
+          </div>
+
+          <div class="btnMsg">
+            <button id="btnSend">Envoyer</button>
+            <button id="btnSendMute">Envoyer silencieusement</button>
+            <button id="btnDelete">Supprimer</button>
+          </div>
+
+        </section>
+        <button id="btnShowScore">Afficher la page des scores</button>
+      </div>
+    </div>
+
+    <section class="logs">
+      <h3>Historique des notifications</h3>
+
+      <article class="logList" id="logList">
+      </article>
+    </section>
+  </main>
+
+  <aside class="notificationBar"></aside>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io("/panel");
+
+    socket.on("load", (datas) => {
+      document.getElementById("title").innerHTML = `Panel de Stream : ${datas.name}`;
+      document.getElementById("date").innerHTML = `- ${datas.date} -`;
+      generateFloors(datas);
+
+      createNotification("success", `Page chargée avec succès via le socket /panel.<br><br><strong>Configuration du tournoi :</strong><br>- Nom : ${datas.name}<br>- ${datas.amountFloors} terrains de jeu`);
+
+
+      document.getElementById("btnShowScore").addEventListener("click", () => {
+        window.open(`http://${datas.ipAdressReseau}:${datas.port}/score`, `Scores : ${datas.name}`, `width=1080,height=720`);
+      })
+    });
+
+    socket.on("endMatch", (floor) => {
+      document.getElementById(`inputFloor${floor}`).value = "";
+    });
+
+    socket.on("notif", (datas) => {
+      if (!datas.type || !datas.message) return;
+
+      createNotification(datas.type, datas.message);
+
+      let divLogList = document.getElementById("logList");
+
+      let newParagraph = document.createElement("p");
+      newParagraph.classList.add("notifMsg");
+
+
+      const hours = (new Date()).getHours().toString().padStart(2, '0');
+      const minutes = (new Date()).getMinutes().toString().padStart(2, '0');
+
+      newParagraph.innerHTML = `${hours}h${minutes} - ${datas.message}`;
+
+      divLogList.insertBefore(newParagraph, divLogList.firstChild);
+    });
+
+    socket.on("editFloorInfos", (datas) => {
+      let targetParagraph = document.getElementById(`paragraphFloor${datas.floor}`);
+
+      let txt = `${datas.duration} - ${datas.winner != "" ? "Fini" : datas.player1Set3 != "" ? "Set #3" : datas.player1Set2 != "" ? "Set #2" : "Set #1"} | ${datas.round} - ${datas.category} : ${datas.player1} - ${datas.player2}`;
+
+      targetParagraph.innerHTML = txt;
+
+      if (datas.winner != "") {
+        setTimeout(() => {
+          if (targetParagraph.getHTML() == txt) targetParagraph.innerHTML = "";
+        }, 15000);
+      };
+    })
+
+    function generateFloors(datas) {
+      const section = document.getElementById("floorsSection");
+      section.innerHTML = "";
+
+      for (let i = 0; i < datas.amountFloors; i++) {
+        const floorDiv = document.createElement("div");
+        floorDiv.classList.add("terrainPhone");
+
+        const title = document.createElement("p");
+        title.textContent = `Terrain ${i + 1}`;
+
+        const input = document.createElement("input");
+        input.setAttribute("type", "number");
+        input.setAttribute("id", `inputFloor${i + 1}`);
+        input.setAttribute("name", `inputFloor${i + 1}`);
+        input.setAttribute("placeholder", `N° du match`);
+
+        input.value = datas.cache.floorMatchs[i + 1].match ? datas.cache.floorMatchs[i + 1].match : ""
+
+        const paragraphInfosMatch = document.createElement("p");
+        paragraphInfosMatch.setAttribute("id", `paragraphFloor${i + 1}`)
+        paragraphInfosMatch.classList.add("paragraphFloor")
+
+        let mData = datas.cache.floorMatchs[i + 1].scores || null;
+
+        if (mData) {
+          let txt = `${mData.duration} - ${mData.winner != "" ? "Fini" : mData.player1Set3 != "" ? "Set #3" : mData.player1Set2 != "" ? "Set #2" : "Set #1"} | ${mData.round} - ${mData.category} : ${mData.player1} - ${mData.player2}`;
+          paragraphInfosMatch.innerHTML = txt;
+        }
+
+        floorDiv.appendChild(title);
+        floorDiv.appendChild(input);
+        floorDiv.appendChild(paragraphInfosMatch);
+        section.appendChild(floorDiv);
+
+        input.addEventListener('change', (event) => {
+          if (event.target.value != "" && (isNaN(parseInt(event.target.value)) || parseInt(event.target.value) < 0)) {
+            createNotification("error", `Le numéro de match indiqué est invalide.`)
+          } else {
+            fetch(`http://${datas.ipAdressReseau}:${datas.port}/setFloorMatch?floor=${i + 1}&matchNumber=${event.target.value}`);
+
+            if (event.target.value == "") {
+              createNotification("success", `Le terrain ${i + 1} n'est désormais plus assigné à aucun match.`);
+            } else {
+              createNotification("success", `Le terrain ${i + 1} a été assigné au match N°${event.target.value}`);
+            }
+          }
+        });
+      };
+    };
+
+    function createNotification(type, message) {
+      const container = document.querySelector('.notificationBar');
+
+      // Création de la notif
+      const notif = document.createElement('article');
+      notif.classList.add('notif');
+
+      // Ajout de la classe selon le type
+      if (type === 'success') {
+        notif.classList.add('successNotif');
+      } else if (type === 'error') {
+        notif.classList.add('errorNotif');
+      } else if (type === 'info') {
+        notif.classList.add('infoNotif')
+      } else {
+        return;
+      }
+
+      notif.innerHTML = `
+          <h5>${type === 'success' ? 'Succès' : type === 'error' ? 'Erreur' : 'Information'}</h5>
+          <p>${message}</p>
+          <div class="progressBar ${type}ProgressBar"></div>
+        `;
+
+      // Insertion dans le container
+      container.appendChild(notif);
+
+      // Timer de disparition
+      const duration = 5000; // durée en ms
+
+      setTimeout(() => {
+        notif.classList.add('closing');
+        notif.addEventListener('animationend', () => {
+          notif.remove();
+        }, { once: true });
+      }, duration);
+    };
+
+    function sendAlert(sound = false) {
+      let content = document.getElementById("messageContent").value;
+      let duration = document.getElementById("messageDuration").value;
+
+      if (!content || !duration || content == "" || duration == "" || content == " " || duration == " ") {
+        createNotification("error", "Veuillez indiquer un message et une durée (0 = Infini).")
+        return;
+      };
+
+      socket.emit("alert", { content, duration, sound });
+
+      document.getElementById("messageContent").value = "";
+      document.getElementById("messageDuration").value = "";
+
+      createNotification("success", `Message envoyé avec succès ${parseInt(duration) ? ` pendant ${duration} secondes.` : ` de manière infinie.`}<br>Alerte sonore : ${sound ? `Activée` : `Désactivée`}`)
+    };
+
+    document.getElementById("btnSend").addEventListener("click", () => sendAlert(true));
+    document.getElementById("btnSendMute").addEventListener("click", () => sendAlert());
+  </script>
+</body>
+
+</html>
