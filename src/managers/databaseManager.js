@@ -5,6 +5,7 @@ const Database = require('better-sqlite3');
 const fs = require("fs");
 
 const { MatchStatus } = require('../enums/MatchStatus');
+const { TournamentStatus } = require('../enums/TournamentStatus');
 
 // ------------------------ //
 //        CONSTANTES        //
@@ -130,7 +131,8 @@ const initializeMainDatabase = (db) => {
         nomTournoi TEXT NOT NULL,
         dateTournoi TEXT NOT NULL,
         nombreTerrains INTEGER NOT NULL,
-        databaseName TEXT NOT NULL
+        databaseName TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT '${TournamentStatus.UPCOMING}'
     );`;
 
     db.prepare(requeteTableTournois).run();
