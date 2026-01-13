@@ -7,7 +7,6 @@ const { join } = require('node:path');
 const express = require('express');
 const { createServer } = require('node:http');
 
-const { Server } = require('socket.io');
 
 const config = require("../../config");
 
