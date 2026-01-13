@@ -33,8 +33,13 @@ function loadTournaments(tournaments) {
         }
 
         let tournament = tournaments[i];
+
+        let linkElt = document.createElement("a");
+        linkElt.href = `/tournament?id=${tournament.idTournoi}`;
+        linkElt.classList.add("text-decoration-none", "col-5", "text-white");
+        
         let tournamentElt = document.createElement("article");
-        tournamentElt.classList.add(`col-5`, `p-3`);
+        tournamentElt.classList.add(`p-3`);
 
      
         tournamentElt.innerHTML = `
@@ -49,7 +54,8 @@ function loadTournaments(tournaments) {
             <p class="col-12">Date : ${tournament.dateTournoi}</p>
         `
 
-        container2Tournaments.appendChild(tournamentElt);
+        linkElt.appendChild(tournamentElt);
+        container2Tournaments.appendChild(linkElt);
     }
 
     container.appendChild(container2Tournaments);
