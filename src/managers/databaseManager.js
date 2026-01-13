@@ -161,6 +161,18 @@ const registerNewTournament = (tournamentName, tournamentDate, numberOfCourts, d
     initializeTournamentDatabase(db);
 };
 
+/**
+ * Récupère la liste des tournois enregistrés dans la base de données principale.
+ * @returns { Array }
+ */
+const getTournamentList = () => {
+    let mainDb = getMainDatabase();
+
+    let getTourneys = `SELECT * FROM ${MAIN_DB_TOURNAMENTS_TABLE};`;
+    
+    return mainDb.prepare(getTourneys).all();
+}
+
 
 // --------------------- OTHER DATABASE --------------------- //
 
@@ -323,5 +335,6 @@ module.exports = {
     updateMatchStatus,
     getMatchStatus,
     updateMatchScore,
-    getMatchScore
+    getMatchScore,
+    getTournamentList
 }
