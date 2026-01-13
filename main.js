@@ -13,8 +13,8 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server);
 
-app.use(express.static(path.join(__dirname, "public")))
-app.use(express.static(path.join(__dirname, "pages")))
+app.use(express.static(path.join(__dirname, "web/public")))
+app.use(express.static(path.join(__dirname, "web/pages")))
 
 
 /** Variables globales */
@@ -33,16 +33,16 @@ app.get('/', (req, res) => {
 });
 
 /** Panels Web */
-app.get(`/panel`, (req, res) => {
-  res.sendFile(join(__dirname, 'pages/panel.html'));
+app.get(`/panelStream`, (req, res) => {
+  res.sendFile(join(__dirname, 'web/pages/panelStream.html'));
 })
 
 app.get(`/score`, (req, res) => {
-  res.sendFile(join(__dirname, 'pages/score.html'));
+  res.sendFile(join(__dirname, 'web/pages/score.html'));
 })
 
 app.get(`/viewer`, (req, res) => {
-  res.sendFile(join(__dirname, 'pages/viewer.html'));
+  res.sendFile(join(__dirname, 'web/pages/viewer.html'));
 })
 
 /** Gestion des overlay de scores */
@@ -75,7 +75,7 @@ for (let i = 0; i < config.AMOUNT_FLOORS; i++) {
 
   /** Génération des redirections */
   app.get(`/floor${i + 1}`, (req, res) => {
-    res.sendFile(join(__dirname, "pages/floorOverlay.html"));
+    res.sendFile(join(__dirname, "web/pages/floorOverlay.html"));
   });
 
   /** Génération des WebSocket*/
