@@ -15,5 +15,13 @@ module.exports = {
 
         
 
+        socket.on("createTournament", (datas) => {
+            databaseManager.registerNewTournament(datas.nom, datas.date, datas.terrains);
+
+            socketServ.of("/index").emit("load", {
+                tournaments: databaseManager.getTournamentList(),
+            })
+        })
+
     }
 }

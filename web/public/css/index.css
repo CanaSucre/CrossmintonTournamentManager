@@ -8,3 +8,17 @@ body {
 header {
     text-align: center;
 }
+
+
+main article {
+    background-color: #2A2A3D;
+    border-radius: 8px;
+    
+}
+
+#createTournamentBtn {
+    position: fixed;
+
+    bottom: 20px;
+    right: 20px;
+}
