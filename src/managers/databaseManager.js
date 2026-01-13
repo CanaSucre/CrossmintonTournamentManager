@@ -146,22 +146,43 @@ const initializeMainDatabase = (db) => {
  * @param {int} numberOfCourts 
  * @param {string} databaseName 
  */
-const registerNewTournament = (tournamentName, tournamentDate, numberOfCourts, databaseName) => {
-    if (checkDatabaseExists(databaseName)) {
-       throw new Error(`Une base de données existe déjà sous le nom ${databaseName}.`);
-    }
+const registerNewTournament = (tournamentName, tournamentDate, numberOfCourts) => {
+    let databaseName = generateTournamentDatabaseName(tournamentName, tournamentDate);
  
     let insertTournament = `INSERT INTO ${MAIN_DB_TOURNAMENTS_TABLE} 
     (nomTournoi, dateTournoi, nombreTerrains, databaseName) 
     VALUES (?, ?, ?, ?);`;
 
     let mainDb = getMainDatabase();
-    console.log(mainDb);
     mainDb.prepare(insertTournament).run(tournamentName, tournamentDate, numberOfCourts, databaseName);
 
     let db = createDatabase(databaseName);
     initializeTournamentDatabase(db);
 };
+
+
+/**
+ * Génère un nom de base de données unique pour un tournoi.
+ * @param {string} tournamentName 
+ * @param {string} tournamentDate 
+ * @returns {string}
+ */
+const generateTournamentDatabaseName = (tournamentName, tournamentDate) => {
+    let datePart = tournamentDate.replace(/-/g, "");
+    let namePart = tournamentName.replaceAll("-", "").trim().replace(/\s+/g, "_").toLowerCase();
+
+    if (checkDatabaseExists(`${namePart}-${datePart}.db`)) {
+        let counter = 1;
+
+        while (checkDatabaseExists(`${namePart}-${datePart}-${counter}.db`)) {
+            counter++;
+        }
+    
+        return `${namePart}-${datePart}-${counter}.db`;
+    }
+
+    return `${namePart}-${datePart}.db`;
+}
 
 /**
  * Récupère la liste des tournois enregistrés dans la base de données principale.

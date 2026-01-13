@@ -10,8 +10,8 @@ const webSocketManger = require('../managers/websocketManager');
 const loadWebsocket = () => {
     let wb = webSocketManger.getWebsocketServer();
 
-    // Fichier contenant l'ensemble des websocket
-    const websocketPath = path.join(__dirname, '..', 'websockets');
+    // Fichier contenant l'ensemble des websocket d'envoi
+    const websocketPath = path.join(__dirname, '../websockets');
 
     fs.readdirSync(websocketPath).forEach(file => {
         // Empêche de charger les fichiers non JS
