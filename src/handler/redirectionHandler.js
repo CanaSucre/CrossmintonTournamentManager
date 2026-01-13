@@ -7,7 +7,7 @@ const path = require('path');
  */
 const loadRedirection = (webApp) => {
     // Fichier contenant l'ensemble des redirections
-    const redirectionsPath = path.join(__dirname, '../redirections');
+    const redirectionsPath = path.join(__dirname, '..', 'redirections');
 
     fs.readdirSync(redirectionsPath).forEach(file => {
         // Empêche de charger les fichiers non JS

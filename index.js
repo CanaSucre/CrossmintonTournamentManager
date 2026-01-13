@@ -21,5 +21,3 @@ const { loadRedirection } = require('./src/handler/redirectionHandler');
 dbManager.getMainDatabase();
 
 loadRedirection(webAppManager.app);
-
-

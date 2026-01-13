@@ -18,8 +18,8 @@ const config = require("../../config");
 const app = express();
 const server = createServer(app);
 
-app.use(express.static(path.join(__dirname, "/web/public")))
-app.use(express.static(path.join(__dirname, "/web/pages")))
+app.use(express.static(path.join(__dirname, "../../web/public")))
+app.use(express.static(path.join(__dirname, "../../web/pages")))
 
 
 // ------------------------ //
