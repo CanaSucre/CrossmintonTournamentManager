@@ -4,7 +4,7 @@
 const Database = require('better-sqlite3');
 const fs = require("fs");
 
-const { MatchStatus } = require('../enums/MatchStatues');
+const { MatchStatus } = require('../enums/MatchStatus');
 
 // ------------------------ //
 //        CONSTANTES        //
