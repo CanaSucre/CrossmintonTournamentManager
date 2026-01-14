@@ -1,0 +1,10 @@
+body {
+    background-color: #1E1E2F;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+    color: #F5F5F5;
+}
+
+header {
+    text-align: center;
+}

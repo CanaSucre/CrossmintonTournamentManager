@@ -1,15 +1,3 @@
-body {
-    background-color: #1E1E2F;
-    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-
-    color: #F5F5F5;
-}
-
-header {
-    text-align: center;
-}
-
-
 main article {
     background-color: #2A2A3D;
     border-radius: 8px;
