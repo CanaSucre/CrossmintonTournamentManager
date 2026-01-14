@@ -345,6 +345,18 @@ const getMatchScore = (db, matchId) => {
         throw new Error(`Aucun match trouvé avec l'ID ${matchId}.`);
     }
 };
+
+
+const getTournamentDatas = (idTournoi) => {
+    if (!idTournoi || isNaN(idTournoi) || idTournoi <= 0) {
+        throw new Error(`ID de tournoi invalide : ${idTournoi}`);
+    }
+
+    let getInfos = `SELECT nomTournoi, dateTournoi, nombreTerrains, status FROM ${MAIN_DB_TOURNAMENTS_TABLE} WHERE idTournoi = ?;`;
+
+    let mainDb = getMainDatabase();
+    return mainDb.prepare(getInfos).get(idTournoi);
+}
         
 
 module.exports = {
@@ -359,5 +371,6 @@ module.exports = {
     getMatchStatus,
     updateMatchScore,
     getMatchScore,
-    getTournamentList
+    getTournamentList,
+    getTournamentDatas
 }
