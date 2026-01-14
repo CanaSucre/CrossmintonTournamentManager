@@ -1,4 +1,3 @@
-const path = require('path')
 const { join } = require('node:path');
 
 module.exports = {

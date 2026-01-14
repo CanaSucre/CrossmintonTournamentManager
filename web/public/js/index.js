@@ -17,12 +17,14 @@ socket.on("load", (data) => {
 function loadTournaments(tournaments) {
     let container = document.getElementById("tournamentList");
 
+    // Supprime les tournois déjà affichés
     container.innerHTML = "";
    
     let container2Tournaments;
 
     for (let i = 0; i < tournaments.length; i++) {
 
+        // Création d'une nouvelle ligne tous les 2 tournois
         if (i % 2 == 0) {
             if (container2Tournaments) {
                 container.appendChild(container2Tournaments)
@@ -32,12 +34,15 @@ function loadTournaments(tournaments) {
             container2Tournaments.classList.add("row", "justify-content-around", "my-4");
         }
 
+
         let tournament = tournaments[i];
 
+        // Lien de redirection
         let linkElt = document.createElement("a");
-        linkElt.href = `/tournament?id=${tournament.idTournoi}`;
+        linkElt.href = `/tournament/${tournament.idTournoi}`;
         linkElt.classList.add("text-decoration-none", "col-5", "text-white");
         
+        // Bloc d'infos du tournoi
         let tournamentElt = document.createElement("article");
         tournamentElt.classList.add(`p-3`);
 
@@ -54,10 +59,12 @@ function loadTournaments(tournaments) {
             <p class="col-12">Date : ${tournament.dateTournoi}</p>
         `
 
+        // Ajout du tournoi au lien et du lien au container
         linkElt.appendChild(tournamentElt);
         container2Tournaments.appendChild(linkElt);
     }
 
+    // Ajout du dernier container pour les 2 derniers qui ne sont pas ajoutés automatiquement
     container.appendChild(container2Tournaments);
 }
 
