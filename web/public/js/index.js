@@ -4,7 +4,7 @@ const socket = io("/index");
 socket.on("load", (data) => {
 
     if (data.tournaments?.length > 0) {
-        loadTournaments(data.tournaments);
+        loadTournaments(data.tournaments, data.tournamentLive);
     }
 
 });
@@ -14,7 +14,7 @@ socket.on("load", (data) => {
  * Charge les tournois dans l'interface.
  * @param {Array} tournaments 
  */
-function loadTournaments(tournaments) {
+function loadTournaments(tournaments, tournamentLive) {
     let container = document.getElementById("tournamentList");
 
     // Supprime les tournois déjà affichés
@@ -46,11 +46,14 @@ function loadTournaments(tournaments) {
         let tournamentElt = document.createElement("article");
         tournamentElt.classList.add(`p-3`);
 
+        let isTournamentLive = tournamentLive && tournament.idTournoi == tournamentLive;
+        console.log(tournamentLive)
      
         tournamentElt.innerHTML = `
             <div class="d-flex justify-content-between">
                 <h4>${tournament.nomTournoi}</h4>
                 <div class="d-flex justify-content-around">
+                    ${isTournamentLive ? `<p class="badge bg-danger mx-3"><i class="bi bi-wifi"></i> LIVE</p>` : ''}
                     <i class="bi bi-circle-fill ${getColorByStatus(tournament.status)}"></i>
                     <p class="mx-2 ${getColorByStatus(tournament.status)}">${tournament.status}</p>
                 </div>
