@@ -1,6 +1,6 @@
 const MatchStatus = Object.freeze({
     NOT_PLAYED: "not_played",
-    ONGOING: "ongoing",
+    IN_PROGRESS: "in_progress",
     COMPLETED: "completed",
 });
 

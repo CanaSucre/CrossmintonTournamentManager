@@ -11,6 +11,7 @@ module.exports = {
 
         socketServ.of("/index").emit("load", {
             tournaments: databaseManager.getTournamentList(),
+            tournamentLive: databaseManager.getSetting("live_tournament"), 
         })
 
         
@@ -20,6 +21,7 @@ module.exports = {
 
             socketServ.of("/index").emit("load", {
                 tournaments: databaseManager.getTournamentList(),
+                tournamentLive: databaseManager.getSetting("live_tournament"), 
             })
         })
 

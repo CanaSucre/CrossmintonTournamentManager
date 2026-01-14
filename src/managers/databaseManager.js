@@ -14,6 +14,7 @@ const FOLDER_DB_NAME = "databases";
 const MAIN_DB_NAME = "main.db";
 
 const MAIN_DB_TOURNAMENTS_TABLE = "tournois";
+const MAIN_DB_SETTINGS_TABLE = "settings";
 
 // matchId, round, category, player1, player2
 const NB_ELEMENTS_IN_MATCH_CSV = 5;
@@ -135,7 +136,13 @@ const initializeMainDatabase = (db) => {
         status TEXT NOT NULL DEFAULT '${TournamentStatus.UPCOMING}'
     );`;
 
+    let requeteTableSettings = `CREATE TABLE IF NOT EXISTS ${MAIN_DB_SETTINGS_TABLE} (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+    );`;
+
     db.prepare(requeteTableTournois).run();
+    db.prepare(requeteTableSettings).run();
 }
 
 
@@ -196,6 +203,36 @@ const getTournamentList = () => {
     return mainDb.prepare(getTourneys).all();
 }
 
+/**
+ * Met à jour ou enregistre une valeur dans la table des paramètres.
+ * @param {string} key 
+ * @param {string} value 
+ */
+const updateSetting = (key, value) => {
+    let upsertSetting = `INSERT INTO ${MAIN_DB_SETTINGS_TABLE} (key, value) VALUES (?, ?)
+    ON CONFLICT(key) DO UPDATE SET value = excluded.value;`;
+
+    let mainDb = getMainDatabase();
+    mainDb.prepare(upsertSetting).run(key, value);
+};
+
+/**
+ * Récupère une valeur dans la table des paramètres.
+ * @param {string} key 
+ * @returns {string|null}
+ */
+const getSetting = (key) => {
+    let getSetting = `SELECT value FROM ${MAIN_DB_SETTINGS_TABLE} WHERE key = ?;`;
+
+    let mainDb = getMainDatabase();
+    let row = mainDb.prepare(getSetting).get(key);
+
+    if (row) {
+        return row.value;
+    } else {
+        return null;
+    }
+};
 
 // --------------------- OTHER DATABASE --------------------- //
 
@@ -232,6 +269,8 @@ const initializeTournamentDatabase = (db) => {
         set2Joueur2 INTEGER,
         set3Joueur1 INTEGER,
         set3Joueur2 INTEGER,
+
+        winner TEXT,
 
         statut TEXT NOT NULL DEFAULT '${MatchStatus.NOT_PLAYED}'
     );`;
@@ -352,10 +391,17 @@ const getTournamentDatas = (idTournoi) => {
         throw new Error(`ID de tournoi invalide : ${idTournoi}`);
     }
 
-    let getInfos = `SELECT nomTournoi, dateTournoi, nombreTerrains, status FROM ${MAIN_DB_TOURNAMENTS_TABLE} WHERE idTournoi = ?;`;
+    let getInfos = `SELECT nomTournoi, dateTournoi, nombreTerrains, status, databaseName FROM ${MAIN_DB_TOURNAMENTS_TABLE} WHERE idTournoi = ?;`;
 
     let mainDb = getMainDatabase();
-    return mainDb.prepare(getInfos).get(idTournoi);
+    let tournamentInfo = mainDb.prepare(getInfos).get(idTournoi);
+
+    let tournamentDb = loadDatabase(tournamentInfo.databaseName);
+
+    return {
+        tournamentInfos: { ...tournamentInfo },
+        matchs: tournamentDb.prepare(`SELECT * FROM matchs;`).all()
+    };
 }
         
 
@@ -372,5 +418,7 @@ module.exports = {
     updateMatchScore,
     getMatchScore,
     getTournamentList,
-    getTournamentDatas
+    getTournamentDatas,
+    updateSetting,
+    getSetting
 }
