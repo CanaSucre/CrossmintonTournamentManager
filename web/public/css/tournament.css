@@ -1,0 +1,83 @@
+#actionBar, #statBar, #matchesList {
+    background-color: #2A2A3D;
+}
+
+.colorMatch-0 {
+    color: #feb8b8;
+}
+
+.colorMatch-1 {
+    color: #f9eda9;
+}
+
+.colorMatch-2 {
+    color: #88B04B;
+}
+
+.colorMatch-3 {
+    color: #a9ffdb;
+}
+
+.colorMatch-4 {
+    color: #7e84ff;
+}
+
+.colorMatch-5 {
+    color: #a554fb;
+}
+
+
+.statItem {
+    border: 1px solid #3E3E50;
+    background-color: #3E3E50;
+    border-radius: 15px;
+}
+
+.statItem p {
+    font-variant: small-caps;
+}
+
+
+#matchesListContent {
+    height: 400px;
+    overflow-y: auto;
+}
+
+.matchEntrie {
+    border-bottom: 1px solid #3E3E50;
+}
+
+.matchEntrie:last-child {
+    border-bottom: none;
+}
+
+.matchEntrie:nth-of-type(2n + 1) {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.matchEntrie:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Largeur de l’ascenseur */
+::-webkit-scrollbar {
+  width: 7px;
+}
+
+/* Fond de la scrollbar */
+::-webkit-scrollbar-track {
+  background: rgba(241, 241, 241, 0.2);
+
+  border-radius: 8px;
+}
+
+/* Curseur */
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+}
+
+/* Hover */
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.7);
+}
