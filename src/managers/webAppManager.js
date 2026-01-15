@@ -2,14 +2,11 @@
 //         IMPORTS          //
 // ------------------------ //
 const path = require('path')
-const { join } = require('node:path');
 
 const express = require('express');
 const { createServer } = require('node:http');
 
-
 const config = require("../../config");
-
 
 // ------------------------ //
 //     INITIALISATIONS      //
