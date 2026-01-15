@@ -6,7 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
   <link rel="stylesheet" type="text/css" href="/css/global.css" />
   <link rel="stylesheet" type="text/css" href="/css/tournament.css" />
 
@@ -48,9 +49,35 @@
       <div class="row">
         <div id="matchesList" class="px-3 py-2 m-3 rounded-3 col-6">
 
-          <h5 class="my-2"><i class="bi bi-list-ul"></i> Matchs</h5>
+          <div class="d-flex align-items-center justify-content-between my-2">
+
+            <h5 class="mb-0">
+              <i class="bi bi-list-ul"></i> Matchs
+            </h5>
+
+            <div class="d-flex gap-3">
+              <select id="matchSort" class="form-select form-select-sm w-auto">
+                <option value="num_match" selected>N° Match</option>
+                <option value="categorie">Catégorie</option>
+              </select>
+
+              <select id="matchFilter_status" class="form-select form-select-sm w-auto">
+                <option value="all" selected>Tous</option>
+                <option value="in_progress">En cours</option>
+                <option value="completed">Terminé</option>
+                <option value="not_played">Non joué</option>
+              </select>
+
+              <select id="matchFilter_category" class="form-select form-select-sm w-auto">
+                <option value="all" selected>Toute catégorie</option>
+                <!-- Catégories remplies par le JS -->
+              </select>
+            </div>
+
+          </div>
 
           <div id="matchesListContent" class="d-flex flex-column my-2">
+            <!-- Rempli par le javascript -->
           </div>
 
         </div>
@@ -65,4 +92,5 @@
   <script src="/js/tournament.js"></script>
 
 </body>
+
 </html>

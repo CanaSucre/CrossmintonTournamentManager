@@ -47,6 +47,25 @@
     border-bottom: 1px solid #3E3E50;
 }
 
+.matchEntrie table {
+    display: none;
+}
+
+.matchEntrie table, .matchEntrie th, .matchEntrie td {
+    border: 1px solid #555566;
+    border-collapse: collapse;
+    padding: 5px;
+    text-align: center;
+}
+
+.matchEntrie:hover table,
+.force-show {
+    display: block;
+}
+
+
+
+
 .matchEntrie:last-child {
     border-bottom: none;
 }
