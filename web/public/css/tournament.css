@@ -58,8 +58,7 @@
     text-align: center;
 }
 
-.matchEntrie:hover table,
-.force-show {
+.matchEntrie:hover table{
     display: block;
 }
 

@@ -14,6 +14,30 @@ socket.once("load", (data) => {
     loadTournamentDatas();
 });
 
+socket.on("updateMatchScore", (data) => {
+    // Met à jour les données du match dans le tableau des matchs
+    let matchIndex = tournamentDatas.matchs.findIndex(match => match.idMatch == data.matchId);
+
+    if (matchIndex !== -1) {
+        let match = tournamentDatas.matchs[matchIndex];
+
+        match.player1Set1 = data.score.player1Set1;
+        match.player2Set1 = data.score.player2Set1;
+        match.player1Set2 = data.score.player1Set2;
+        match.player2Set2 = data.score.player2Set2;
+        match.player1Set3 = data.score.player1Set3;
+        match.player2Set3 = data.score.player2Set3;
+        match.winner = data.winner || null;
+        match.statut = data.statut;
+
+        tournamentDatas.matchs[matchIndex] = match;
+
+        // Recharger la liste des matchs et la barre de statistiques
+        applyFiltersAndSorting();
+        loadStatBar();
+    }
+});
+
 
 document.getElementById("matchFilter_status").addEventListener("change", (event) => {
     currentFilterStatus = event.target.value;
@@ -61,6 +85,13 @@ function applyFiltersAndSorting() {
                 return 0;
             });
             break;
+        
+        case "round":
+            matchList.sort((a, b) => {
+                if (a.round < b.round) return -1;
+                if (a.round > b.round) return 1;
+                return 0;
+            });
     }
 
 
@@ -168,7 +199,9 @@ function getPlayerList() {
  */
 function getCategoryList() {
     let categories = new Set(tournamentDatas.matchs.map(match => match.category));
-    return Array.from(categories);
+
+    categories = Array.from(categories).sort();
+    return categories;
 }
 
 /**
@@ -240,15 +273,15 @@ function loadMatchesList(matchArray) {
                     </tr>
                     <tr>
                         <td>${match.winner === match.joueur1 ? `<i class="bi bi-trophy-fill"></i> ` : ""}${match.joueur1}</td>
-                        <td>${match.set1Joueur1 ? match.set1Joueur1 : ''}</td>
-                        <td>${match.set2Joueur1 ? match.set2Joueur1 : ''}</td>
-                        <td>${match.set3Joueur1 ? match.set3Joueur1 : ''}</td>
+                        <td>${match.player1Set1 ? match.player1Set1 : ''}</td>
+                        <td>${match.player1Set2 ? match.player1Set2 : ''}</td>
+                        <td>${match.player1Set3 ? match.player1Set3 : ''}</td>
                     </tr>
                     <tr>
                         <td>${match.winner === match.joueur2 ? `<i class="bi bi-trophy-fill"></i> ` : ""}${match.joueur2}</td>
-                        <td>${match.set1Joueur2 ? match.set1Joueur2 : ''}</td>
-                        <td>${match.set2Joueur2 ? match.set2Joueur2 : ''}</td>
-                        <td>${match.set3Joueur2 ? match.set3Joueur2 : ''}</td>
+                        <td>${match.player2Set1 ? match.player2Set1 : ''}</td>
+                        <td>${match.player2Set2 ? match.player2Set2 : ''}</td>
+                        <td>${match.player2Set3 ? match.player2Set3 : ''}</td>
                     </tr>
                 </table>
                 `: ""}
