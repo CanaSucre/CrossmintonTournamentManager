@@ -27,6 +27,11 @@ const NB_ELEMENTS_IN_MATCH_CSV = 5;
 // --------------------- ALL DATABASE --------------------- //
 
 
+/**
+ * Vérifie si le nom de la base de données est valide (doit se terminer par .db)
+ * @param {string} databaseName 
+ * @returns { boolean }
+ */
 const isValidDatabaseName = (databaseName) => {
     return databaseName.endsWith(".db");
 }
@@ -263,13 +268,15 @@ const initializeTournamentDatabase = (db) => {
         joueur1 TEXT NOT NULL,
         joueur2 TEXT NOT NULL,
 
-        set1Joueur1 INTEGER,
-        set1Joueur2 INTEGER,
-        set2Joueur1 INTEGER,
-        set2Joueur2 INTEGER,
-        set3Joueur1 INTEGER,
-        set3Joueur2 INTEGER,
+        player1Set1 INTEGER,
+        player2Set1 INTEGER,
+        player1Set2 INTEGER,
+        player2Set2 INTEGER,
+        player1Set3 INTEGER,
+        player2Set3 INTEGER,
 
+
+        field INTEGER,
         winner TEXT,
 
         statut TEXT NOT NULL DEFAULT '${MatchStatus.NOT_PLAYED}'
@@ -311,6 +318,17 @@ const registerMatchs = (db, matchs) => {
  * @param { MatchStatus } status 
  */
 const updateMatchStatus = (db, matchId, status) => {
+    if (matchId <= 0 || isNaN(matchId)) {
+        throw new Error(`ID de match invalide : ${matchId}`);
+    }
+
+    let matchDatas = getMatchDatas(db, matchId);
+    if (!matchDatas) {
+        throw new Error(`Le match avec l'ID ${matchId} n'existe pas.`);
+    }
+
+
+
     if (!Object.values(MatchStatus).includes(status)) {
         throw new Error(`Statut de match invalide : ${status}`);
     }
@@ -320,21 +338,84 @@ const updateMatchStatus = (db, matchId, status) => {
     db.prepare(updateStatus).run(status, matchId);
 };
 
+
 /**
- * Récupère le statut d'un match dans la base de données.
- * @param { Database } db 
- * @param { int } matchId 
- * @returns { MatchStatus }
+ * Change le numéro de terrain d'un match dans la base de données.
+ * @param {Database} db 
+ * @param {int} matchId 
+ * @param {int} field 
  */
-const getMatchStatus = (db, matchId) => {
-    let getStatus = `SELECT statut FROM matchs WHERE idMatch = ?;`;
+const updateMatchField = (db, matchId, field) => {
+    if (matchId <= 0 || isNaN(matchId)) {
+        throw new Error(`ID de match invalide : ${matchId}`);
+    }
+
+    let matchDatas = getMatchDatas(db, matchId);
+    if (!matchDatas) {
+        throw new Error(`Le match avec l'ID ${matchId} n'existe pas.`);
+    }
+
+    if (field <= 0 || isNaN(field)) {
+        throw new Error(`Numéro de terrain invalide : ${field}`);
+    }
+    
+    
+    let updateField = `UPDATE matchs SET field = ? WHERE idMatch = ?;`;
+
+    db.prepare(updateField).run(field, matchId);
+}
+
+/**
+ * Change le gagnant d'un match dans la base de données.
+ * @param {Database} db 
+ * @param {int} matchId 
+ * @param {string} winner 
+ */
+const updateMatchWinner = (db, matchId, winner) => {
+    if (matchId <= 0 || isNaN(matchId)) {
+        throw new Error(`ID de match invalide : ${matchId}`);
+    }
+
+    let matchDatas = getMatchDatas(db, matchId);
+    if (!matchDatas) {
+        throw new Error(`Le match avec l'ID ${matchId} n'existe pas.`);
+    }
+
+    if (winner !== matchDatas.joueur1 && winner !== matchDatas.joueur2) {
+        throw new Error(`Le gagnant spécifié (${winner}) n'est pas un des joueurs du match ${matchId}.`);
+    }
+
+    if (
+        matchDatas.statut === MatchStatus.NOT_PLAYED ||
+        matchDatas.statut === MatchStatus.IN_PROGRESS
+    ) {
+        throw new Error(`Le match avec l'ID ${matchId} n'a pas encore terminé. Impossible de définir un gagnant.`);
+    }
+
+    let updateWinner = `UPDATE matchs SET winner = ? WHERE idMatch = ?;`;
+
+    db.prepare(updateWinner).run(winner, matchId);
+};
+
+/**
+ * Permet de récupérer les données d'un match à partir de son identifiant.
+ * @param { Database } db Base de données où se situe le match
+ * @param { int } matchId Identifiant du match
+ * @returns { Object }
+ */
+const getMatchDatas = (db, matchId) => {
+    if (matchId <= 0 || isNaN(matchId)) {
+        throw new Error(`ID de match invalide : ${matchId}`);
+    }
+
+    let getStatus = `SELECT * FROM matchs WHERE idMatch = ?;`;
 
     let row = db.prepare(getStatus).get(matchId);
 
     if (row) {
-        return row.statut;
+        return row;
     } else {
-        throw new Error(`Aucun match trouvé avec l'ID ${matchId}.`);
+        return null;
     }
 };
 
@@ -345,47 +426,34 @@ const getMatchStatus = (db, matchId) => {
  * @param { Object } score 
  */
 const updateMatchScore = (db, matchId, score) => {
+    if (matchId <= 0 || isNaN(matchId)) {
+        throw new Error(`ID de match invalide : ${matchId}`);
+    }
+
+    let matchDatas = getMatchDatas(db, matchId);
+    if (!matchDatas) {
+        throw new Error(`Le match avec l'ID ${matchId} n'existe pas.`);
+    }
+
     let updateScore = `UPDATE matchs 
-    SET set1Joueur1 = ?, set1Joueur2 = ?, 
-        set2Joueur1 = ?, set2Joueur2 = ?, 
-        set3Joueur1 = ?, set3Joueur2 = ? 
+    SET player1Set1 = ?, player2Set1 = ?, 
+        player1Set2 = ?, player2Set2 = ?, 
+        player1Set3 = ?, player2Set3 = ? 
     WHERE idMatch = ?;`;
 
     db.prepare(updateScore).run(
-        score.set1.player1, score.set1.player2,
-        score.set2.player1, score.set2.player2,
-        score.set3.player1, score.set3.player2,
+        score.player1Set1, score.player2Set1,
+        score.player1Set2, score.player2Set2,
+        score.player1Set3, score.player2Set3,
         matchId
     );
 };
 
 /**
- * Récupère le score d'un match dans la base de données.
- * @param { Database } db 
- * @param { int } matchId 
- * @returns { Object }
+ * Renvoie les données d'un tournoi à partir de son identifiant.
+ * @param {Integer} idTournoi Identifiant du tournoi
+ * @returns {Object}
  */
-const getMatchScore = (db, matchId) => {
-    let getScore = `SELECT 
-        set1Joueur1, set1Joueur2, 
-        set2Joueur1, set2Joueur2, 
-        set3Joueur1, set3Joueur2 
-    FROM matchs WHERE idMatch = ?;`;
-
-    let row = db.prepare(getScore).get(matchId);
-    
-    if (row) {
-        return {
-            set1: { player1: row.set1Joueur1, player2: row.set1Joueur2 },
-            set2: { player1: row.set2Joueur1, player2: row.set2Joueur2 },
-            set3: { player1: row.set3Joueur1, player2: row.set3Joueur2 }
-        };
-    } else {
-        throw new Error(`Aucun match trouvé avec l'ID ${matchId}.`);
-    }
-};
-
-
 const getTournamentDatas = (idTournoi) => {
     if (!idTournoi || isNaN(idTournoi) || idTournoi <= 0) {
         throw new Error(`ID de tournoi invalide : ${idTournoi}`);
@@ -414,11 +482,13 @@ module.exports = {
     registerNewTournament,
     registerMatchs,
     updateMatchStatus,
-    getMatchStatus,
+    getMatchDatas,
     updateMatchScore,
-    getMatchScore,
     getTournamentList,
     getTournamentDatas,
     updateSetting,
-    getSetting
+    getSetting,
+    updateMatchField,
+    updateMatchScore,
+    updateMatchWinner
 }
