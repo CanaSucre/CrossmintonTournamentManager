@@ -35,6 +35,13 @@ module.exports = {
 
                 try {
                     serverReceptionManager.startReceptionServer(tournamentDatas.tournamentInfos.nombreTerrains);
+
+                    socketServ.of(`/tournament/${tournamentId}`).emit("reload", {
+                        ...tournamentDatas,
+                        isLive: true,
+                        liveEnabled: true
+                    });
+
                     callback(true)
                 } catch (error) {
                     callback(false);
@@ -45,6 +52,13 @@ module.exports = {
 
                 try {
                     serverReceptionManager.closeReceptionServer();
+
+                    socketServ.of(`/tournament/${tournamentId}`).emit("reload", {
+                        ...tournamentDatas,
+                        isLive: false,
+                        liveEnabled: false
+                    });
+
                     callback(true);
                 } catch {
                     callback(false);
@@ -53,6 +67,20 @@ module.exports = {
             } else {
                 callback(false);
             }
+        });
+
+        socket.on("editTournament", data => {
+            databaseManager.updateTournamentName(tournamentId, data.nom);
+            databaseManager.updateTournamentDate(tournamentId, data.date);
+            databaseManager.updateTournamentFields(tournamentId, data.terrains);
+
+            liveTournamentId = databaseManager.getSetting("live_tournament");
+
+            socketServ.of(`/tournament/${tournamentId}`).emit("reload", {
+                ...databaseManager.getTournamentDatas(tournamentId),
+                isLive: liveTournamentId && liveTournamentId == tournamentId ? true: false,
+                liveEnabled: liveTournamentId ? true: false
+            });
         });
 
     }

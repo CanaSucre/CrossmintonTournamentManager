@@ -11,8 +11,24 @@ let tournamentDatas = {};
 socket.once("load", (data) => {
     tournamentDatas = data;
 
+
+    document.getElementById('nom').value = data.tournamentInfos.nomTournoi;
+    document.getElementById('date').value = data.tournamentInfos.dateTournoi;
+    document.getElementById('nombreTerrains').value = data.tournamentInfos.nombreTerrains;
+
     loadTournamentDatas();
 });
+
+socket.on("reload", (data) => {
+    tournamentDatas = data;
+
+    document.getElementById('nom').value = data.tournamentInfos.nomTournoi;
+    document.getElementById('date').value = data.tournamentInfos.dateTournoi;
+    document.getElementById('nombreTerrains').value = data.tournamentInfos.nombreTerrains;
+
+    loadTournamentDatas();
+});
+
 
 socket.on("updateMatchScore", (data) => {
     // Met à jour les données du match dans le tableau des matchs
@@ -170,7 +186,7 @@ function loadActionBarButtons() {
     let actionBarBtn = document.getElementById("actionBarBtn");
     actionBarBtn.innerHTML = "";
 
-    actionBarBtn.innerHTML += `<button id="settings" type="button" class="btn btn-secondary col-3"><i class="bi bi-gear-fill"></i> Paramètres</button>`
+    actionBarBtn.innerHTML += `<button id="settings" type="button" class="btn btn-secondary col-3" data-bs-toggle="modal" data-bs-target="#editModal" onclick="masquerErreur()"><i class="bi bi-gear-fill"></i> Paramètres</button>`
     actionBarBtn.innerHTML += `<button id="loadMatches" type="button" class="btn btn-primary col-3"><i class="bi bi-upload"></i> Charger matchs</button>`
 
     // Le bouton est activé que s'il n'y a pas de live en cours sur un autre tournoi et si le tournoi est en cours
@@ -335,6 +351,9 @@ function getColorByStatus_match(status) {
 }
 
 
+/**
+ * Recharge les événements de la barre d'actiona
+ */
 function reloadEventsActionbar() {
     let btnLiveScore = document.getElementById("editLiveScoreStatus");
 
@@ -355,4 +374,58 @@ function reloadEventsActionbar() {
             }
         });
     });
+}
+
+
+
+
+document.getElementById('editForm').addEventListener('submit', function (event) {
+    event.preventDefault(); // empêche l'envoi classique
+
+    if (!document.getElementById('nom').value || !document.getElementById('date').value || !document.getElementById('nombreTerrains').value) {
+        afficherErreurFormulaire("Veuillez remplir tous les champs.");
+        return;
+    }
+
+    
+    const data = {
+        nom: document.getElementById('nom').value,
+        date: document.getElementById('date').value,
+        terrains: document.getElementById('nombreTerrains').value,
+    };
+
+    tournamentDatas.tournamentInfos.nomTournoi = data.nom;
+    tournamentDatas.tournamentInfos.dateTournoi = data.date;
+    tournamentDatas.tournamentInfos.nombreTerrains = data.terrains;
+
+    document.getElementById('nom').value = data.nom;
+    document.getElementById('date').value = data.date;
+    document.getElementById('nombreTerrains').value = data.terrains;
+
+    masquerErreur();
+
+    socket.emit('editTournament', data);
+    loadTournamentDatas();
+
+    const modal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
+    modal.hide();
+});
+
+
+/**
+ * Affiche une erreur dans le formulaire d'édition de tournoi.
+ * @param {string} message 
+ */
+function afficherErreurFormulaire(message) {
+  const errorDiv = document.getElementById('formError');
+  errorDiv.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> ${message}`;
+  errorDiv.classList.remove('d-none');
+}
+
+/**
+ * Masque l'erreur dans le formulaire d'édition de tournoi.
+ */
+function masquerErreur() {
+  const errorDiv = document.getElementById('formError');
+  errorDiv.classList.add('d-none');
 }

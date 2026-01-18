@@ -239,6 +239,59 @@ const getSetting = (key) => {
     }
 };
 
+
+/**
+ * Change le nom d'un tournoi dans la base de données principale.
+ * @param {int} idTournoi
+ * @param {string} newName
+ */
+const updateTournamentName = (idTournoi, newName) => {
+    if (idTournoi <= 0 || isNaN(idTournoi)) {
+        throw new Error(`ID de tournoi invalide : ${idTournoi}`);
+    };
+
+    let updateName = `UPDATE ${MAIN_DB_TOURNAMENTS_TABLE} SET nomTournoi = ? WHERE idTournoi = ?;`;
+
+    let mainDb = getMainDatabase();
+    mainDb.prepare(updateName).run(newName, idTournoi);
+};
+
+/**
+ * Change la date d'un tournoi dans la base de données principale.
+ * @param {int} idTournoi 
+ * @param {string} newDate 
+ */
+const updateTournamentDate = (idTournoi, newDate) => {
+    if (idTournoi <= 0 || isNaN(idTournoi)) {
+        throw new Error(`ID de tournoi invalide : ${idTournoi}`);
+    };
+
+    let updateDate = `UPDATE ${MAIN_DB_TOURNAMENTS_TABLE} SET dateTournoi = ? WHERE idTournoi = ?;`;
+
+    let mainDb = getMainDatabase();
+    mainDb.prepare(updateDate).run(newDate, idTournoi);
+};
+
+/**
+ * Change le nombre de terrains d'un tournoi dans la base de données principale.
+ * @param {int} idTournoi 
+ * @param {int} newNumberOfCourts 
+ */
+const updateTournamentFields = (idTournoi, newNumberOfCourts) => {
+    if (idTournoi <= 0 || isNaN(idTournoi)) {
+        throw new Error(`ID de tournoi invalide : ${idTournoi}`);
+    };
+
+    if (newNumberOfCourts <= 0 || isNaN(newNumberOfCourts)) {
+        throw new Error(`Nombre de terrains invalide : ${newNumberOfCourts}`);
+    }
+
+    let updateFields = `UPDATE ${MAIN_DB_TOURNAMENTS_TABLE} SET nombreTerrains = ? WHERE idTournoi = ?;`;
+
+    let mainDb = getMainDatabase();
+    mainDb.prepare(updateFields).run(newNumberOfCourts, idTournoi);
+};
+
 // --------------------- OTHER DATABASE --------------------- //
 
 const listDatabases = () => {
@@ -490,5 +543,8 @@ module.exports = {
     getSetting,
     updateMatchField,
     updateMatchScore,
-    updateMatchWinner
+    updateMatchWinner,
+    updateTournamentDate,
+    updateTournamentFields,
+    updateTournamentName
 }

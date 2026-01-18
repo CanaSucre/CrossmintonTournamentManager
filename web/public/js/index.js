@@ -136,6 +136,3 @@ function masquerErreur() {
   const errorDiv = document.getElementById('formError');
   errorDiv.classList.add('d-none');
 }
-
-
-
