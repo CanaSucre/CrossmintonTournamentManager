@@ -6,6 +6,9 @@ const config = require('../../config');
 
 const { handleScoreReception } = require('../handler/receptionScoreHandler');
 
+
+const logger = require('../managers/logManager');
+
 // ------------------------ //
 //     INITIALISATIONS      //
 // ------------------------ //
@@ -35,7 +38,7 @@ const startReceptionServer = (amountOfServers) => {
     httpServers.push(server);
 
     const port = config.PORT_ECOUTE + i;
-    console.log(`Démarrage du serveur sur le port ${port} pour le terrain #${terrainId}`);
+    logger.info(`Serveur de réception démarré sur le port ${port} pour le terrain #${terrainId}.`);
     server.listen(port);
   }
 

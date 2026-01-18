@@ -6,6 +6,8 @@ const webAppManager = require('./src/managers/webAppManager');
 const websocketManager = require('./src/managers/websocketManager');
 const serverReceptionManager = require('./src/managers/serverReceptionManager');
 
+const logger = require('./src/managers/logManager');
+
 const { loadRedirection } = require('./src/handler/redirectionHandler');
 const { loadWebsocket } = require('./src/handler/websocketHandler');
 
@@ -39,5 +41,6 @@ if (currentLiveScoreTournament) {
     let tournamentDatas = dbManager.getTournamentDatas(currentLiveScoreTournament);
 
     serverReceptionManager.startReceptionServer(tournamentDatas.tournamentInfos.nombreTerrains);
-    console.log(`Serveur de réception des scores démarré pour le tournoi "${tournamentDatas.tournamentInfos.nomTournoi}" (${tournamentDatas.tournamentInfos.nombreTerrains} terrains).`);
+
+    logger.info(`Serveur de réception des scores démarré pour le tournoi "${tournamentDatas.tournamentInfos.nomTournoi}" (${tournamentDatas.tournamentInfos.nombreTerrains} terrains).`);
 }

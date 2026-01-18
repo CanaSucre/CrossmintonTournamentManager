@@ -5,3 +5,5 @@ config.js
 databases/
 
 web/public/bootstrap/
+
+logs/

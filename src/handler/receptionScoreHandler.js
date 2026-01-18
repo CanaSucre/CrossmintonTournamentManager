@@ -5,9 +5,9 @@ const querystring = require('querystring');
 const dbManager = require("../managers/databaseManager");
 const websocketManager = require("../managers/websocketManager");
 
+const logger = require('../managers/logManager');
 
 const { MatchStatus } = require("../enums/MatchStatus")
-const { TournamentStatus } = require("../enums/TournamentStatus");
 // ------------------------ //
 //     INITIALISATIONS      //
 // ------------------------ //
@@ -51,12 +51,7 @@ DATAS :
  * @param {Integer} field Numéro du terrain d'où provient la requête
  */
 const handleScoreReception = (req, res, field) => {
-  console.log({
-    time: new Date().toISOString(),
-    field,
-    port: req.socket.localPort,
-    ip: req.socket.remoteAddress
-  });
+  logger.info(`Réception d'une requête de score sur le terrain #${field} depuis l'IP ${req.socket.remoteAddress} sur le port ${req.socket.localPort}. ${req.method} ${req.url}`, true);
 
 
   if (req.method === 'POST') {
@@ -69,6 +64,8 @@ const handleScoreReception = (req, res, field) => {
     req.on('end', () => {
       body = Buffer.concat(body).toString();
       const data = querystring.parse(body);
+
+      logger.info(`Données reçues sur le terrain #${field} : ${JSON.stringify(data)}`, true);
 
       if (checkDataValidity(data, field)) {
         processData(data, field);

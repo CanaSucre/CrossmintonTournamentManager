@@ -8,6 +8,7 @@ const { createServer } = require('node:http');
 
 const config = require("../../config");
 
+const logger = require('../managers/logManager');
 // ------------------------ //
 //     INITIALISATIONS      //
 // ------------------------ //
@@ -22,7 +23,7 @@ app.use(express.static(path.join(__dirname, "../../web/pages")))
 //        PROGRAMME         //
 // ------------------------ //
 server.listen(config.PORT_PANEL, () => {
-  console.log(`Server running at http://${config.IP_ADRESS_RESEAU}:${config.PORT_PANEL}`);
+  logger.info(`Serveur web démarré sur http://${config.IP_ADRESS_RESEAU}:${config.PORT_PANEL}`);
 });
 
 
