@@ -63,8 +63,30 @@ function applyFiltersAndSorting() {
     let matchList = tournamentDatas.matchs;
 
     // Filtrer par statut
-    if (currentFilterStatus !== "all") {
-        matchList = matchList.filter(match => match.statut === currentFilterStatus);
+    switch (currentFilterStatus) {
+        case "started": {
+            matchList = matchList.filter(match => match.statut !== "not_played");
+            break;
+        };
+        case "not_ended": {
+            matchList = matchList.filter(match => match.statut !== "completed");
+            break;
+        };
+        case "in_progress": {
+            matchList = matchList.filter(match => match.statut === "in_progress");
+            break;
+        };
+        case "completed": {
+            matchList = matchList.filter(match => match.statut === "completed");
+            break;
+        };
+        case "not_played": {
+            matchList = matchList.filter(match => match.statut === "not_played");
+            break;
+        }
+        case "all":
+        default:
+        // Ne rien faire
     }
 
     // Filtrer par catégorie
@@ -72,12 +94,13 @@ function applyFiltersAndSorting() {
         matchList = matchList.filter(match => categorieList.indexOf(match.category) == currentFilterCategory);
     }
 
+
     // Trier les matchs
     switch (currentSort) {
         case "num_match":
             matchList.sort((a, b) => a.idMatch - b.idMatch);
             break;
-        
+
         case "categorie":
             matchList.sort((a, b) => {
                 if (a.category < b.category) return -1;
@@ -85,7 +108,7 @@ function applyFiltersAndSorting() {
                 return 0;
             });
             break;
-        
+
         case "round":
             matchList.sort((a, b) => {
                 if (a.round < b.round) return -1;
@@ -127,7 +150,7 @@ function loadTournamentDatas() {
     loadMatchesList(tournamentDatas.matchs);
 
 
-     // Remplir les options de filtre par catégorie
+    // Remplir les options de filtre par catégorie
     let categoryFilterSelect = document.getElementById("matchFilter_category");
     let categories = getCategoryList();
 
@@ -147,35 +170,35 @@ function loadActionBarButtons() {
     let actionBarBtn = document.getElementById("actionBarBtn");
     actionBarBtn.innerHTML = "";
 
-    actionBarBtn.innerHTML += `<button type="button" class="btn btn-secondary col-3"><i class="bi bi-gear-fill"></i> Paramètres</button>`
-    actionBarBtn.innerHTML += `<button type="button" class="btn btn-primary col-3"><i class="bi bi-upload"></i> Charger matchs</button>`
+    actionBarBtn.innerHTML += `<button id="settings" type="button" class="btn btn-secondary col-3"><i class="bi bi-gear-fill"></i> Paramètres</button>`
+    actionBarBtn.innerHTML += `<button id="loadMatches" type="button" class="btn btn-primary col-3"><i class="bi bi-upload"></i> Charger matchs</button>`
 
     // Le bouton est activé que s'il n'y a pas de live en cours sur un autre tournoi et si le tournoi est en cours
-    let buttonDisabled = tournamentDatas.tournamentInfos.status !== "Ongoing" || tournamentDatas.liveEnabled ? "disabled": "";
+    let buttonDisabled = tournamentDatas.tournamentInfos.status !== "Ongoing" || tournamentDatas.liveEnabled ? "disabled" : "";
     if (tournamentDatas.isLive) {
-        actionBarBtn.innerHTML += `<button type="button" class="btn btn-danger col-3"><i class="bi bi-wifi"></i> Stop LiveScore</button>`;
+        actionBarBtn.innerHTML += `<button id="editLiveScoreStatus" type="button" class="btn btn-danger col-3"><i class="bi bi-wifi"></i> Stop LiveScore</button>`;
     } else {
-        actionBarBtn.innerHTML += `<button type="button" class="btn btn-success col-3" ${buttonDisabled}><i class="bi bi-wifi"></i> Start LiveScore</button>`;
+        actionBarBtn.innerHTML += `<button id="editLiveScoreStatus" type="button" class="btn btn-success col-3" ${buttonDisabled}><i class="bi bi-wifi"></i> Start LiveScore</button>`;
     }
 
     switch (tournamentDatas.tournamentInfos.status) {
         case "Upcoming": {
-            actionBarBtn.innerHTML += `<button type="button" class="btn btn-success col-2"><i class="bi bi-play-fill"></i> Démarrer</button>`;
+            actionBarBtn.innerHTML += `<button id="nextStatus" type="button" class="btn btn-success col-2"><i class="bi bi-play-fill"></i> Démarrer</button>`;
             break;
         };
 
         case "Ongoing": {
-            actionBarBtn.innerHTML += `<button type="button" class="btn btn-danger col-2"><i class="bi bi-stop-fill"></i> Terminer</button>`;
+            actionBarBtn.innerHTML += `<button id="nextStatus" type="button" class="btn btn-danger col-2"><i class="bi bi-stop-fill"></i> Terminer</button>`;
             break;
         };
 
         case "Completed": {
-            actionBarBtn.innerHTML += `<button type="button" class="btn btn-secondary col-2" disabled><i class="bi bi-pause-fill"></i> Terminé</button>`;
+            actionBarBtn.innerHTML += `<button id="nextStatus" type="button" class="btn btn-secondary col-2" disabled><i class="bi bi-pause-fill"></i> Terminé</button>`;
             break;
         };
     };
 
-    
+    reloadEventsActionbar();
 }
 
 
@@ -247,9 +270,9 @@ function loadStatBar() {
 function loadMatchesList(matchArray) {
     let matchesList = document.getElementById("matchesListContent");
     matchesList.innerHTML = "";
-    
+
     let categoriesColor = {};
-   getCategoryList().forEach((category, index) => categoriesColor[category] = index);
+    getCategoryList().forEach((category, index) => categoriesColor[category] = index);
 
 
     matchArray.forEach(match => {
@@ -260,10 +283,10 @@ function loadMatchesList(matchArray) {
                         <i class="bi bi-circle-fill ${getColorByStatus_match(match.statut)}"></i>
                         N°${match.idMatch} | ${match.category} - ${match.round} | ${match.joueur1} - ${match.joueur2}
                     </span>
-                    ${match.statut === "completed" ? `<span class="px-2"><i class="bi bi-trophy-fill"></i> ${match.winner}</span>`:``}
+                    ${match.statut === "completed" ? `<span class="px-2"><i class="bi bi-trophy-fill"></i> ${match.winner}</span>` : ``}
                 </div>
 
-                ${match.statut === "in_progress"  || match.statut === "completed" ? ` 
+                ${match.statut === "in_progress" || match.statut === "completed" ? ` 
                 <table>
                     <tr>
                         <th></th>
@@ -309,4 +332,27 @@ function getColorByStatus_match(status) {
         default:
             return "black";
     }
+}
+
+
+function reloadEventsActionbar() {
+    let btnLiveScore = document.getElementById("editLiveScoreStatus");
+
+    btnLiveScore.addEventListener("click", () => {
+        socket.emit("editLiveScoreStatus", (res) => {
+            if (res) {
+                if (btnLiveScore.classList.contains("btn-danger")) {
+                    btnLiveScore.classList.remove("btn-danger");
+                    btnLiveScore.classList.add("btn-success");
+
+                    btnLiveScore.innerHTML = `<i class="bi bi-wifi"></i> Start LiveScore`
+                } else {
+                    btnLiveScore.classList.remove("btn-success");
+                    btnLiveScore.classList.add("btn-danger");
+
+                    btnLiveScore.innerHTML = `<i class="bi bi-wifi"></i> Stop LiveScore`
+                }
+            }
+        });
+    });
 }

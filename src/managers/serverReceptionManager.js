@@ -47,6 +47,8 @@ const closeReceptionServer = () => {
     });
     
     httpServers = [];
+
+    console.log("Les serveurs de réception ont été stoppés.")
   } else {
     throw new Error("Les serveurs de réception ne sont pas démarrés.");
   }

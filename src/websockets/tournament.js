@@ -1,5 +1,6 @@
 const databaseManager = require("../managers/databaseManager");
 const websocketManager = require("../managers/websocketManager");
+const serverReceptionManager = require("../managers/serverReceptionManager");
 
 module.exports = {
     namespace: /^\/tournament\/\d+$/,
@@ -22,6 +23,36 @@ module.exports = {
             ...databaseManager.getTournamentDatas(tournamentId),
             isLive: liveTournamentId && liveTournamentId == tournamentId ? true: false,
             liveEnabled: liveTournamentId ? true: false
+        });
+
+
+        socket.on("editLiveScoreStatus", (callback) => {
+            let liveTournamentId = databaseManager.getSetting("live_tournament");
+            let tournamentDatas = databaseManager.getTournamentDatas(tournamentId);
+
+            if (liveTournamentId == null) {
+                databaseManager.updateSetting("live_tournament", tournamentId);
+
+                try {
+                    serverReceptionManager.startReceptionServer(tournamentDatas.tournamentInfos.nombreTerrains);
+                    callback(true)
+                } catch (error) {
+                    callback(false);
+                }
+
+            } else if (liveTournamentId == tournamentId) {
+                databaseManager.updateSetting("live_tournament", null);
+
+                try {
+                    serverReceptionManager.closeReceptionServer();
+                    callback(true);
+                } catch {
+                    callback(false);
+                }
+
+            } else {
+                callback(false);
+            }
         });
 
     }
