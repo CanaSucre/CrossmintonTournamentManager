@@ -51,7 +51,14 @@ DATAS :
  * @param {Integer} field Numéro du terrain d'où provient la requête
  */
 const handleScoreReception = (req, res, field) => {
-  console.log(`Réception d'une requête de score sur le terrain #${field + 1}.`);
+  console.log({
+    time: new Date().toISOString(),
+    field,
+    port: req.socket.localPort,
+    ip: req.socket.remoteAddress
+  });
+
+
   if (req.method === 'POST') {
     let body = [];
 
@@ -81,7 +88,6 @@ const handleScoreReception = (req, res, field) => {
 }
 
 const processData = (data, field) => {
-  console.log(data);
   // Tournament ID :
   let currentTournament = dbManager.getSetting("live_tournament");
   let tournamentDatas = dbManager.getTournamentDatas(currentTournament);

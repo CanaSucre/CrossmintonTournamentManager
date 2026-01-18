@@ -26,14 +26,19 @@ const startReceptionServer = (amountOfServers) => {
   };
 
   for (let i = 0; i < amountOfServers; i++) {
-    const server = http.createServer((req, res) => { 
-      handleScoreReception(req, res, i+1) 
+    const terrainId = i + 1;
+
+    const server = http.createServer((req, res) => {
+      handleScoreReception(req, res, terrainId);
     });
+
     httpServers.push(server);
-    
-    console.log(`Démarrage du serveur de réception des scores sur le port ${config.PORT_ECOUTE + i} pour le terrain #${i+1}.`);
-    server.listen(config.PORT_ECOUTE + i, config.IP_ADRESS_RESEAU, () => { });
+
+    const port = config.PORT_ECOUTE + i;
+    console.log(`Démarrage du serveur sur le port ${port} pour le terrain #${terrainId}`);
+    server.listen(port);
   }
+
 }
 
 
