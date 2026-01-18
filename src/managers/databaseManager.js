@@ -143,7 +143,7 @@ const initializeMainDatabase = (db) => {
 
     let requeteTableSettings = `CREATE TABLE IF NOT EXISTS ${MAIN_DB_SETTINGS_TABLE} (
         key TEXT PRIMARY KEY,
-        value TEXT NOT NULL
+        value TEXT
     );`;
 
     db.prepare(requeteTableTournois).run();
