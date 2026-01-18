@@ -2,6 +2,18 @@
 const tournamentId = window.location.pathname.split('/').pop();
 const socket = io(`/tournament/${tournamentId}`);
 
+const FLOOR_ICON = {
+    1: "bi bi-1-circle",
+    2: "bi bi-2-circle",
+    3: "bi bi-3-circle",
+    4: "bi bi-4-circle",
+    5: "bi bi-5-circle",
+    6: "bi bi-6-circle",
+    7: "bi bi-7-circle",
+    8: "bi bi-8-circle",
+    9: "bi bi-9-circle",
+}
+
 let currentFilterStatus = "all";
 let currentFilterCategory = "all";
 let currentSort = "num_match";
@@ -45,6 +57,7 @@ socket.on("updateMatchScore", (data) => {
         match.player2Set3 = data.score.player2Set3;
         match.winner = data.winner || null;
         match.statut = data.statut;
+        match.field = data.field || null;
 
         tournamentDatas.matchs[matchIndex] = match;
 
@@ -290,13 +303,15 @@ function loadMatchesList(matchArray) {
     let categoriesColor = {};
     getCategoryList().forEach((category, index) => categoriesColor[category] = index);
 
-
+    
     matchArray.forEach(match => {
+        let icon = match.statut == "in_progress" ? FLOOR_ICON[match.field] || "bi bi-circle-fill": "bi bi-circle-fill";
+
         matchesList.innerHTML += `
             <div class="matchEntrie m-0">
                 <div class="d-flex justify-content-between colorMatch-${categoriesColor[match.category]}">
                     <span>
-                        <i class="bi bi-circle-fill ${getColorByStatus_match(match.statut)}"></i>
+                        <i class="${icon} ${getColorByStatus_match(match.statut)}"></i>
                         N°${match.idMatch} | ${match.category} - ${match.round} | ${match.joueur1} - ${match.joueur2}
                     </span>
                     ${match.statut === "completed" ? `<span class="px-2"><i class="bi bi-trophy-fill"></i> ${match.winner}</span>` : ``}
