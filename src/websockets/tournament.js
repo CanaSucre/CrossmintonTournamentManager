@@ -2,6 +2,8 @@ const databaseManager = require("../managers/databaseManager");
 const websocketManager = require("../managers/websocketManager");
 const serverReceptionManager = require("../managers/serverReceptionManager");
 
+const logger = require("../managers/logManager");
+
 module.exports = {
     namespace: /^\/tournament\/\d+$/,
     event: "connection",
@@ -13,7 +15,7 @@ module.exports = {
         const tournamentId = socket.nsp.name.split("/").pop();
         
         if (!tournamentId || isNaN(tournamentId) || tournamentId <= 0) {
-            console.error(`ID de tournoi invalide pour la connexion WebSocket : ${tournamentId}`);
+            logger.error(`ID de tournoi invalide pour la connexion WebSocket : ${tournamentId}`);
             return;
         }
 

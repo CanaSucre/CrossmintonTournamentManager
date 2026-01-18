@@ -47,7 +47,6 @@ function loadTournaments(tournaments, tournamentLive) {
         tournamentElt.classList.add(`p-3`);
 
         let isTournamentLive = tournamentLive && tournament.idTournoi == tournamentLive;
-        console.log(tournamentLive)
      
         tournamentElt.innerHTML = `
             <div class="d-flex justify-content-between">

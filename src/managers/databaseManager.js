@@ -7,6 +7,8 @@ const fs = require("fs");
 const { MatchStatus } = require('../enums/MatchStatus');
 const { TournamentStatus } = require('../enums/TournamentStatus');
 
+const logger = require("../managers/logManager");
+
 // ------------------------ //
 //        CONSTANTES        //
 // ------------------------ //
@@ -121,7 +123,7 @@ const getMainDatabase = () => {
         let db = createDatabase(MAIN_DB_NAME);
 
         initializeMainDatabase(db);
-        console.log(`La base de données principale a été créée sous le nom ${MAIN_DB_NAME}.`);
+        logger.info(`La base de données principale a été créée sous le nom ${MAIN_DB_NAME}.`);
     }
 
     return loadDatabase(MAIN_DB_NAME);
