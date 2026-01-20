@@ -125,6 +125,23 @@ const processData = (data, field) => {
     statut: data.winner == '' ? MatchStatus.IN_PROGRESS : MatchStatus.COMPLETED
   });
 
+  socketServ.of(`/fieldScore/${field}`).emit("update", {
+    round: data.round,
+    category: data.category,
+    duration: data.duration,
+    player1: data.player1,
+    player2: data.player2,
+    server1: data.server1,
+    server2: data.server2,
+    player1Set1: data.player1Set1,
+    player1Set2: data.player1Set2,
+    player1Set3: data.player1Set3,
+    player2Set1: data.player2Set1,
+    player2Set2: data.player2Set2,
+    player2Set3: data.player2Set3,
+    winner: data.winner,
+  });
+
 }
 
 

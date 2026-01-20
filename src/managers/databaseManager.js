@@ -507,7 +507,7 @@ const updateMatchScore = (db, matchId, score) => {
 /**
  * Renvoie les données d'un tournoi à partir de son identifiant.
  * @param {Integer} idTournoi Identifiant du tournoi
- * @returns {Object}
+ * @returns {Object} { tournamentInfos: {...}, matchs: [...] }
  */
 const getTournamentDatas = (idTournoi) => {
     if (!idTournoi || isNaN(idTournoi) || idTournoi <= 0) {

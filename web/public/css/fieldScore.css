@@ -1,0 +1,62 @@
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+body {
+  color: #ffffff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: black;
+
+  text-align: center;
+}
+
+.hidden {
+  display: none;
+}
+
+table {
+  border: 1px solid black;
+  background-color: rgba(71, 140, 252, 0.6);
+  border-radius: 15px;
+  padding: 10px;
+
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.matchInfos {
+  padding-bottom: 10px;
+}
+
+
+.spaceP {
+  padding-right: 1em;
+  text-align: left;
+}
+
+.spaceS {
+  padding-right: 10px;
+  padding-left: 10px;
+}
+
+.bordBottom {
+  border-bottom: 1px solid #ffffff;
+}
+
+.bordRight {
+  border-right: 1px solid #ffffff;
+}
+
+.animationOff {
+  animation: fadeOut 5s ease forwards;
+}
+
+.animationOn {
+  animation: fadeOut 5s ease forwards;
+}

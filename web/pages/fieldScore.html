@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" type="text/css" href="/css/fieldScore.css" />
+
+
+  <title>FieldScoreOverlay</title>
+</head>
+
+<body>
+  <table id="tableau" class="hidden">
+    <tr>
+      <th colspan="4" class="matchInfos" id="matchInfos">Loading... - Loading... | Loading...</th>
+    </tr>
+    <tr>
+      <td class="bordBottom bordRight"></td>
+      <th class="bordBottom bordRight spaceS">Set 1</th>
+      <th class="bordBottom bordRight spaceS">Set 2</th>
+      <th class="bordBottom spaceS">Set 3</th>
+    </tr>
+    <tr>
+      <th class="bordBottom bordRight spaceP" id="p1">Loading...</th>
+      <td class="bordBottom bordRight" id="p1-s1">Loading...</td>
+      <td class="bordBottom bordRight" id="p1-s2">Loading...</td>
+      <td class="bordBottom" id="p1-s3">Loading...</td>
+    </tr>
+    <tr>
+      <th class="bordRight spaceP" id="p2">Loading...</th>
+      <td class="bordRight" id="p2-s1">Loading...</td>
+      <td class="bordRight" id="p2-s2">Loading...</td>
+      <td id="p2-s3">Loading...</td>
+    </tr>
+  </table>
+
+
+  <script src="/socket.io/socket.io.js"></script>
+   <script src="/js/fieldScore.js"></script>
+
+
+</body>
+
+</html>

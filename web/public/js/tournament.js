@@ -2,7 +2,7 @@
 const tournamentId = window.location.pathname.split('/').pop();
 const socket = io(`/tournament/${tournamentId}`);
 
-const FLOOR_ICON = {
+const FIELD_ICON = {
     1: "bi bi-1-circle",
     2: "bi bi-2-circle",
     3: "bi bi-3-circle",
@@ -305,7 +305,7 @@ function loadMatchesList(matchArray) {
 
     
     matchArray.forEach(match => {
-        let icon = match.statut == "in_progress" ? FLOOR_ICON[match.field] || "bi bi-circle-fill": "bi bi-circle-fill";
+        let icon = match.statut == "in_progress" ? FIELD_ICON[match.field] || "bi bi-circle-fill": "bi bi-circle-fill";
 
         matchesList.innerHTML += `
             <div class="matchEntrie m-0">
