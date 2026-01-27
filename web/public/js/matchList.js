@@ -42,8 +42,6 @@ socket.on('updateMatch', (updatedMatch) => {
             ...tournamentMatchs[matchIndex],
             ...updatedMatch
         };
-    } else {
-        tournamentMatchs.push(updatedMatch);
     }
 
     renderMatchList();
