@@ -125,7 +125,7 @@ const processData = (data, field) => {
     statut: data.winner == '' ? MatchStatus.IN_PROGRESS : MatchStatus.COMPLETED
   });
 
-  socketServ.of(`/fieldScore/${field}`).emit("update", {
+  let matchInfos = {
     round: data.round,
     category: data.category,
     duration: data.duration,
@@ -140,7 +140,13 @@ const processData = (data, field) => {
     player2Set2: data.player2Set2,
     player2Set3: data.player2Set3,
     winner: data.winner,
-  });
+    idMatch: parseInt(data.numMatch),
+    statut: data.winner == '' ? MatchStatus.IN_PROGRESS : MatchStatus.COMPLETED,
+    field: field,
+  };
+
+  socketServ.of(`/fieldScore/${field}`).emit("update", matchInfos);
+  socketServ.of(`/tournament/${currentTournament}/matchList`).emit("updateMatch", matchInfos);
 
 }
 

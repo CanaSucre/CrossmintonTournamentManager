@@ -1,0 +1,26 @@
+#matchListContainer {
+    display: grid;
+    grid-auto-flow: column;              /* remplit par colonne */
+    grid-template-rows: repeat(auto-fill, 25px);/* 30 matchs par colonne */
+    height: 100vh;
+    gap: 0 2px;
+}
+
+.matchEntrie {
+    height: 25px;   /* à adapter à ton design */
+}
+
+
+
+.matchEntrie {
+    border-bottom: 1px solid #3E3E50;
+}
+
+.matchEntrie:nth-of-type(2n + 1) {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.matchEntrie:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
