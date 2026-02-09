@@ -77,6 +77,11 @@
     background-color: rgba(255, 255, 255, 0.1);
 }
 
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
 /* Largeur de l’ascenseur */
 ::-webkit-scrollbar {
   width: 7px;

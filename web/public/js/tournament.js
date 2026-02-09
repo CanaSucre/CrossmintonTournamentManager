@@ -2,6 +2,7 @@
 const tournamentId = window.location.pathname.split('/').pop();
 const socket = io(`/tournament/${tournamentId}`);
 
+
 const FIELD_ICON = {
     1: "bi bi-1-circle",
     2: "bi bi-2-circle",
@@ -82,6 +83,9 @@ document.getElementById("matchSort").addEventListener("change", (event) => {
     currentSort = event.target.value;
     applyFiltersAndSorting();
 });
+
+document.getElementById('matchListTitle').setAttribute("href", `/tournament/${tournamentId}/matchList`);
+document.getElementById('matchListTitle').setAttribute("target", "_blank");
 
 
 /**
@@ -200,7 +204,7 @@ function loadActionBarButtons() {
     actionBarBtn.innerHTML = "";
 
     actionBarBtn.innerHTML += `<button id="settings" type="button" class="btn btn-secondary col-3" data-bs-toggle="modal" data-bs-target="#editModal" onclick="masquerErreur()"><i class="bi bi-gear-fill"></i> Paramètres</button>`
-    actionBarBtn.innerHTML += `<button id="loadMatches" type="button" class="btn btn-primary col-3"><i class="bi bi-upload"></i> Charger matchs</button>`
+    actionBarBtn.innerHTML += `<button id="loadMatches" type="button" class="btn btn-primary col-3" data-bs-toggle="modal" data-bs-target="#loadMatchModal"><i class="bi bi-upload"></i> Charger matchs</button>`
 
     // Le bouton est activé que s'il n'y a pas de live en cours sur un autre tournoi et si le tournoi est en cours
     let buttonDisabled = tournamentDatas.tournamentInfos.status !== "Ongoing" || tournamentDatas.liveEnabled ? "disabled" : "";
