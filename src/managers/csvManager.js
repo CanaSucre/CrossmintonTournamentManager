@@ -19,13 +19,27 @@ const SEPARATOR = ";";
  * @param {string} filePath 
  * @returns { Array<Array<string>> }
  */
-const readCSV = (filePath) => {
+const readCSVfromFile = (filePath) => {
 
     try {
         let data = fs.readFileSync(filePath, "utf8");
 
+        return readCSV(data);
+        
+    } catch (error) {
+        throw new Error(`Error reading CSV file: ${error.message}`);
+    }
+}
+
+/**
+ * Lit une chaîne CSV et retourne son contenu dans un tableau de tableaux
+ * @param {string} content 
+ * @returns Array<Array<string>>
+ */
+const readCSV = (content) => {
+    try {
         // Séparation des lignes et mise en forme des cellules
-        let rows = data.split("\n")
+        let rows = content.split("\n")
             .map(row => 
                 row.split(SEPARATOR)
                     .map(cell => cell.replaceAll("\r", "").trim())
@@ -42,9 +56,8 @@ const readCSV = (filePath) => {
 
         return rows;
     } catch (error) {
-        throw new Error(`Error reading CSV file: ${error.message}`);
-    }
-
+        throw new Error(`Error parsing CSV content: ${error.message}`);
+    };
 }
 
 /**
