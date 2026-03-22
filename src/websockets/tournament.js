@@ -2,6 +2,8 @@ const databaseManager = require("../managers/databaseManager");
 const websocketManager = require("../managers/websocketManager");
 const serverReceptionManager = require("../managers/serverReceptionManager");
 
+const csvManager = require("../managers/csvManager");
+
 const logger = require("../managers/logManager");
 
 module.exports = {
@@ -85,5 +87,25 @@ module.exports = {
             });
         });
 
+        socket.on("loadMatchs", data => {
+            try {
+                const matchs = csvManager.readCSV(data.matchs);
+               
+                let tournamentDatas = databaseManager.getTournamentDatas(tournamentId);
+                let tournamentDb = databaseManager.loadDatabase(tournamentDatas.tournamentInfos.databaseName);
+
+                databaseManager.registerMatchs(tournamentDb, matchs);
+
+                liveTournamentId = databaseManager.getSetting("live_tournament");
+
+                socketServ.of(`/tournament/${tournamentId}`).emit("reload", {
+                    ...databaseManager.getTournamentDatas(tournamentId),
+                    isLive: liveTournamentId && liveTournamentId == tournamentId ? true: false,
+                    liveEnabled: liveTournamentId ? true: false
+                });
+            } catch (error) {
+                logger.error(`Erreur lors du parsing des matchs CSV : ${error.message}`);
+            }
+        });
     }
 }

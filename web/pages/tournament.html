@@ -97,7 +97,7 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
 
-        <div id="formError" class="alert alert-danger d-none" role="alert">
+        <div id="formError_editModal" class="alert alert-danger d-none" role="alert">
         </div>
 
         <div class="modal-header">
@@ -156,6 +156,9 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
 
+        <div id="formError_loadMatchModal" class="alert alert-danger d-none" role="alert">
+        </div>
+
         <div class="modal-header">
           <h5 class="modal-title">Charger les matchs</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -165,7 +168,7 @@
           <form id="loadMatchForm">
             <div class="mb-3">
               <label class="form-label">Contenu du fichier CSV</label>
-              <textarea class="form-control" id="matchs" rows="8" placeholder="N°;CATEGORIE;TOUR;NOM1;NOM2&#10;1;OPEN;POULE 1;GABILLARD R;MALGOR T"></textarea>
+              <textarea class="form-control" id="matchsForm" rows="8" placeholder="N°;CATEGORIE;TOUR;NOM1;NOM2&#10;1;OPEN;POULE 1;GABILLARD R;MALGOR T"></textarea>
             </div>
           </form>
         </div>

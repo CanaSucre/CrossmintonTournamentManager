@@ -204,7 +204,7 @@ function loadActionBarButtons() {
     actionBarBtn.innerHTML = "";
 
     actionBarBtn.innerHTML += `<button id="settings" type="button" class="btn btn-secondary col-3" data-bs-toggle="modal" data-bs-target="#editModal" onclick="masquerErreur()"><i class="bi bi-gear-fill"></i> Paramètres</button>`
-    actionBarBtn.innerHTML += `<button id="loadMatches" type="button" class="btn btn-primary col-3" data-bs-toggle="modal" data-bs-target="#loadMatchModal"><i class="bi bi-upload"></i> Charger matchs</button>`
+    actionBarBtn.innerHTML += `<button id="loadMatches" type="button" class="btn btn-primary col-3" data-bs-toggle="modal" data-bs-target="#loadMatchModal" onclick="masquerErreur()"><i class="bi bi-upload"></i> Charger matchs</button>`
 
     // Le bouton est activé que s'il n'y a pas de live en cours sur un autre tournoi et si le tournoi est en cours
     let buttonDisabled = tournamentDatas.tournamentInfos.status !== "Ongoing" || tournamentDatas.liveEnabled ? "disabled" : "";
@@ -402,7 +402,7 @@ document.getElementById('editForm').addEventListener('submit', function (event) 
     event.preventDefault(); // empêche l'envoi classique
 
     if (!document.getElementById('nom').value || !document.getElementById('date').value || !document.getElementById('nombreTerrains').value) {
-        afficherErreurFormulaire("Veuillez remplir tous les champs.");
+        afficherErreurFormulaire("formError_editModal", "Veuillez remplir tous les champs.");
         return;
     }
 
@@ -431,12 +431,34 @@ document.getElementById('editForm').addEventListener('submit', function (event) 
 });
 
 
+document.getElementById('loadMatchForm').addEventListener('submit', function (event) {
+
+    event.preventDefault(); // empêche l'envoi classique
+
+    if (!document.getElementById('matchsForm').value) {
+        afficherErreurFormulaire("formError_loadMatchModal", "Veuillez remplir tous les champs.");
+        return;
+    }
+
+    const datas = {
+        matchs: document.getElementById('matchsForm').value,
+    };
+
+    masquerErreur();
+
+    socket.emit('loadMatchs', datas);
+
+    loadTournamentDatas();
+    const modal = bootstrap.Modal.getInstance(document.getElementById('loadMatchModal'));
+    modal.hide()
+});
+
 /**
  * Affiche une erreur dans le formulaire d'édition de tournoi.
  * @param {string} message 
  */
-function afficherErreurFormulaire(message) {
-  const errorDiv = document.getElementById('formError');
+function afficherErreurFormulaire(errorId, message) {
+  const errorDiv = document.getElementById(errorId);
   errorDiv.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> ${message}`;
   errorDiv.classList.remove('d-none');
 }
@@ -445,6 +467,9 @@ function afficherErreurFormulaire(message) {
  * Masque l'erreur dans le formulaire d'édition de tournoi.
  */
 function masquerErreur() {
-  const errorDiv = document.getElementById('formError');
+  const errorDiv = document.getElementById('formError_loadMatchModal');
   errorDiv.classList.add('d-none');
+
+    const errorDivEdit = document.getElementById('formError_editModal');
+    errorDivEdit.classList.add('d-none');
 }
