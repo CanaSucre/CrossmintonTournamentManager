@@ -72,5 +72,6 @@ const formatCSV = (data) => {
 
 module.exports = {
     readCSV,
+    readCSVfromFile,
     formatCSV
 }
