@@ -162,7 +162,7 @@ const initializeMainDatabase = (db) => {
  */
 const registerNewTournament = (tournamentName, tournamentDate, numberOfCourts) => {
     let databaseName = generateTournamentDatabaseName(tournamentName, tournamentDate);
- 
+
     let insertTournament = `INSERT INTO ${MAIN_DB_TOURNAMENTS_TABLE} 
     (nomTournoi, dateTournoi, nombreTerrains, databaseName) 
     VALUES (?, ?, ?, ?);`;
@@ -191,7 +191,7 @@ const generateTournamentDatabaseName = (tournamentName, tournamentDate) => {
         while (checkDatabaseExists(`${namePart}-${datePart}-${counter}.db`)) {
             counter++;
         }
-    
+
         return `${namePart}-${datePart}-${counter}.db`;
     }
 
@@ -206,7 +206,7 @@ const getTournamentList = () => {
     let mainDb = getMainDatabase();
 
     let getTourneys = `SELECT * FROM ${MAIN_DB_TOURNAMENTS_TABLE};`;
-    
+
     return mainDb.prepare(getTourneys).all();
 }
 
@@ -300,9 +300,9 @@ const listDatabases = () => {
     createDatabaseDirectory();
 
     let files = fs.readdirSync(FOLDER_DB_NAME);
-    
-    files = files.filter(file => 
-        file.endsWith(".db") && 
+
+    files = files.filter(file =>
+        file.endsWith(".db") &&
         file !== MAIN_DB_NAME
     );
 
@@ -345,25 +345,27 @@ const initializeTournamentDatabase = (db) => {
  * @param { Database } db 
  * @param { Array<Array<string>> } matchs 
  */
-const registerMatchs = (db, matchs) => {
-    
-    for (let i = 0; i < matchs.length; i++) {
-        let match = matchs[i];
+const registerMatchs = async (db, matchs) => {
+    return new Promise(async resolve => {
+        for (let i = 0; i < matchs.length; i++) {
+            let match = matchs[i];
 
-        if (match.length != NB_ELEMENTS_IN_MATCH_CSV) continue;
-        
-        let insertMatch = `INSERT INTO matchs 
+            if (match.length != NB_ELEMENTS_IN_MATCH_CSV) continue;
+
+            let insertMatch = `INSERT INTO matchs 
         (idMatch, round, category, joueur1, joueur2) 
         VALUES (?, ?, ?, ?, ?);`;
 
-        db.prepare(insertMatch).run(
-            match[0], // idMatch
-            match[1], // round
-            match[2], // category
-            match[3], // player1
-            match[4]  // player2
-        );
-    }
+            await db.prepare(insertMatch).run(
+                match[0], // idMatch
+                match[1], // round
+                match[2], // category
+                match[3], // player1
+                match[4]  // player2
+            );
+        }
+    })
+
 }
 
 /**
@@ -413,8 +415,8 @@ const updateMatchField = (db, matchId, field) => {
     if (field <= 0 || isNaN(field)) {
         throw new Error(`Numéro de terrain invalide : ${field}`);
     }
-    
-    
+
+
     let updateField = `UPDATE matchs SET field = ? WHERE idMatch = ?;`;
 
     db.prepare(updateField).run(field, matchId);
@@ -526,7 +528,7 @@ const getTournamentDatas = (idTournoi) => {
         matchs: tournamentDb.prepare(`SELECT * FROM matchs;`).all()
     };
 }
-        
+
 
 module.exports = {
     getMainDatabase,

@@ -53,7 +53,6 @@ DATAS :
 const handleScoreReception = (req, res, field) => {
   logger.info(`Réception d'une requête de score sur le terrain #${field} depuis l'IP ${req.socket.remoteAddress} sur le port ${req.socket.localPort}. ${req.method} ${req.url}`, true);
 
-
   if (req.method === 'POST') {
     let body = [];
 
@@ -84,13 +83,27 @@ const handleScoreReception = (req, res, field) => {
   }
 }
 
-const processData = (data, field) => {
+const processData = async (data, field) => {
   // Tournament ID :
   let currentTournament = dbManager.getSetting("live_tournament");
   let tournamentDatas = dbManager.getTournamentDatas(currentTournament);
 
   let tournamentDb = dbManager.loadDatabase(tournamentDatas.tournamentInfos.databaseName);
   let matchDatas = dbManager.getMatchDatas(tournamentDb, data.numMatch);
+
+  let unknownMatch = matchDatas ? false : true;
+
+  if (unknownMatch) {
+
+    await dbManager.registerMatchs(
+      tournamentDb,
+      [
+        [ data.numMatch, data.round, data.category, data.player1, data.player2 ]
+      ]
+    )
+
+    matchDatas = dbManager.getMatchDatas(tournamentDb, data.numMatch);
+  }
 
   if (matchDatas.statut != MatchStatus.IN_PROGRESS) {
     dbManager.updateMatchStatus(tournamentDb, data.numMatch, MatchStatus.IN_PROGRESS);
@@ -117,12 +130,17 @@ const processData = (data, field) => {
 
   const socketServ = websocketManager.getWebsocketServer();
 
+
   socketServ.of(`/tournament/${currentTournament}`).emit("updateMatchScore", {
     matchId: data.numMatch,
     score: score,
     winner: data.winner == '' ? null : data.winner,
     field: field,
-    statut: data.winner == '' ? MatchStatus.IN_PROGRESS : MatchStatus.COMPLETED
+    statut: data.winner == '' ? MatchStatus.IN_PROGRESS : MatchStatus.COMPLETED,
+    player1: data.player1,
+    player2: data.player2,
+    category: data.category,
+    round: data.round,
   });
 
   let matchInfos = {
