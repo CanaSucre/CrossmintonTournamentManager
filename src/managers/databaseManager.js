@@ -353,13 +353,13 @@ const registerMatchs = async (db, matchs) => {
             if (match.length != NB_ELEMENTS_IN_MATCH_CSV) continue;
 
             let insertMatch = `INSERT INTO matchs 
-        (idMatch, round, category, joueur1, joueur2) 
+        (idMatch, category, round, joueur1, joueur2) 
         VALUES (?, ?, ?, ?, ?);`;
 
             await db.prepare(insertMatch).run(
                 match[0], // idMatch
-                match[1], // round
-                match[2], // category
+                match[1], // category
+                match[2], // round
                 match[3], // player1
                 match[4]  // player2
             );
