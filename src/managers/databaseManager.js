@@ -438,9 +438,9 @@ const updateMatchWinner = (db, matchId, winner) => {
         throw new Error(`Le match avec l'ID ${matchId} n'existe pas.`);
     }
 
-    if (winner !== matchDatas.joueur1 && winner !== matchDatas.joueur2) {
-        throw new Error(`Le gagnant spécifié (${winner}) n'est pas un des joueurs du match ${matchId}.`);
-    }
+    // if (winner !== matchDatas.joueur1 && winner !== matchDatas.joueur2) {
+    //     throw new Error(`Le gagnant spécifié (${winner}) n'est pas un des joueurs du match ${matchId}.`);
+    // }
 
     if (
         matchDatas.statut === MatchStatus.NOT_PLAYED ||

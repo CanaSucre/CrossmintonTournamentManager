@@ -66,6 +66,11 @@ const handleScoreReception = (req, res, field) => {
 
       logger.info(`Données reçues sur le terrain #${field} : ${JSON.stringify(data)}`, true);
 
+      
+      data.numMatch = data.numMatch.replaceAll('"', "");
+      
+      if (data.player2) data.player2 = data.player2.replaceAll('"', "");
+      
       if (checkDataValidity(data, field)) {
         processData(data, field);
 
