@@ -20,7 +20,7 @@ const { loadWebsocket } = require('./src/handler/websocketHandler');
 // ------------------------ //
 //     INITIALISATIONS      //
 // ------------------------ //
-dbManager.getMainDatabase();
+dbManager.getDatabase();
 
 websocketManager.setupWebsocketServer(webAppManager.server);
 

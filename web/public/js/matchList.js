@@ -65,7 +65,7 @@ function renderMatchList() {
                 <div class="d-flex justify-content-between" id="match-${match.idMatch}">
                     <span>
                         <i class="${icon} ${STATUS_COLOR[match.statut]}"></i>
-                        N°${match.idMatch} | ${match.category} - ${match.round} | ${match.joueur1} - ${match.joueur2}
+                        N°${match.idMatch} | ${match.category} - ${match.round} | ${match.player1} - ${match.player2}
                     </span>
                     ${match.statut === "completed" ? `<span><i class="bi bi-trophy-fill"></i> ${match.winner}</span>` : ``}
                 </div>

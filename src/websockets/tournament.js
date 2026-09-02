@@ -91,10 +91,7 @@ module.exports = {
             try {
                 const matchs = csvManager.readCSV(data.matchs);
                
-                let tournamentDatas = databaseManager.getTournamentDatas(tournamentId);
-                let tournamentDb = databaseManager.loadDatabase(tournamentDatas.tournamentInfos.databaseName);
-
-                databaseManager.registerMatchs(tournamentDb, matchs);
+                databaseManager.registerMatchs(tournamentId, matchs);
 
                 liveTournamentId = databaseManager.getSetting("live_tournament");
 
