@@ -65,6 +65,30 @@ socket.on("updateMatchScore", (data) => {
         // Recharger la liste des matchs et la barre de statistiques
         applyFiltersAndSorting();
         loadStatBar();
+    } else {
+        console.log(data);
+        tournamentDatas.matchs.push({
+            idMatch: data.matchId,
+            round: data.round,
+            category: data.category,
+            joueur1: data.player1,
+            joueur2: data.player2,
+            player1Set1: data.score.player1Set1,
+            player2Set1: data.score.player2Set1,
+            player1Set2: data.score.player1Set2,
+            player2Set2: data.score.player2Set2,
+            player1Set3: data.score.player1Set3,
+            player2Set3: data.score.player2Set3,
+            winner: data.winner || null,
+            statut: data.statut,
+            field: data.field || null,
+        }); 
+
+        tournamentDatas.matchs.sort((a, b) => a.idMatch - b.idMatch);
+
+        // Recharger la liste des matchs et la barre de statistiques
+        applyFiltersAndSorting();
+        loadStatBar();
     }
 });
 

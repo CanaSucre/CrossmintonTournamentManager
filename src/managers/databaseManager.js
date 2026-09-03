@@ -395,7 +395,7 @@ const getTournamentDatas = (idTournoi) => {
         matchs
     };
 }
-        
+
 
 module.exports = {
     getDatabase,
