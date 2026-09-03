@@ -264,8 +264,8 @@ function loadActionBarButtons() {
  * @returns {Array}
  */
 function getPlayerList() {
-    let playersOne = tournamentDatas.matchs.map(match => match.joueur1);
-    let playersTwo = tournamentDatas.matchs.map(match => match.joueur2);
+    let playersOne = tournamentDatas.matchs.map(match => match.player1);
+    let playersTwo = tournamentDatas.matchs.map(match => match.player2);
     let allPlayers = playersOne.concat(playersTwo);
 
     let uniquePlayers = Array.from(new Set(allPlayers));
@@ -340,7 +340,7 @@ function loadMatchesList(matchArray) {
                 <div class="d-flex justify-content-between colorMatch-${categoriesColor[match.category]}">
                     <span>
                         <i class="${icon} ${getColorByStatus_match(match.statut)}"></i>
-                        N°${match.idMatch} | ${match.category} - ${match.round} | ${match.joueur1} - ${match.joueur2}
+                        N°${match.idMatch} | ${match.category} - ${match.round} | ${match.player1} - ${match.player2}
                     </span>
                     ${match.statut === "completed" ? `<span class="px-2"><i class="bi bi-trophy-fill"></i> ${match.winner}</span>` : ``}
                 </div>
@@ -354,13 +354,13 @@ function loadMatchesList(matchArray) {
                         <th>Set 3</th>
                     </tr>
                     <tr>
-                        <td>${match.winner === match.joueur1 ? `<i class="bi bi-trophy-fill"></i> ` : ""}${match.joueur1}</td>
+                        <td>${match.winner === match.player1 ? `<i class="bi bi-trophy-fill"></i> ` : ""}${match.player1}</td>
                         <td>${match.player1Set1 ? match.player1Set1 : ''}</td>
                         <td>${match.player1Set2 ? match.player1Set2 : ''}</td>
                         <td>${match.player1Set3 ? match.player1Set3 : ''}</td>
                     </tr>
                     <tr>
-                        <td>${match.winner === match.joueur2 ? `<i class="bi bi-trophy-fill"></i> ` : ""}${match.joueur2}</td>
+                        <td>${match.winner === match.player2 ? `<i class="bi bi-trophy-fill"></i> ` : ""}${match.player2}</td>
                         <td>${match.player2Set1 ? match.player2Set1 : ''}</td>
                         <td>${match.player2Set2 ? match.player2Set2 : ''}</td>
                         <td>${match.player2Set3 ? match.player2Set3 : ''}</td>

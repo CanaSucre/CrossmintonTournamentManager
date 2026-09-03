@@ -7,3 +7,5 @@ databases/
 web/public/bootstrap/
 
 logs/
+
+dbTest/

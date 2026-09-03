@@ -17,26 +17,15 @@ const MAIN_DB_NAME = "main.db";
 
 const MAIN_DB_TOURNAMENTS_TABLE = "tournois";
 const MAIN_DB_SETTINGS_TABLE = "settings";
+const MAIN_DB_MATCH_TABLE = "matchs";
 
 // matchId, round, category, player1, player2
 const NB_ELEMENTS_IN_MATCH_CSV = 5;
 
 // ------------------------ //
-//        PROGRAMME         //
+//        FONCTIONS         //
 // ------------------------ //
 
-
-// --------------------- ALL DATABASE --------------------- //
-
-
-/**
- * Vérifie si le nom de la base de données est valide (doit se terminer par .db)
- * @param {string} databaseName 
- * @returns { boolean }
- */
-const isValidDatabaseName = (databaseName) => {
-    return databaseName.endsWith(".db");
-}
 
 
 /**
@@ -50,96 +39,55 @@ const createDatabaseDirectory = () => {
 
 
 /**
- * Charge une base de données si elle existe
- * @param {string} databaseName | Nom de la base de données à charger
+ * Récupère la base de données principale, la crée si elle n'existe pas.
  * @returns { Database }
  */
-const loadDatabase = (databaseName) => {
-    if (!isValidDatabaseName(databaseName)) {
-        throw new Error(`Le nom de la base de données doit se terminer par .db`);
-    }
-
+const getDatabase = () => {
     createDatabaseDirectory();
 
-    let path = `${FOLDER_DB_NAME}/${databaseName}`;
+    let path = `${FOLDER_DB_NAME}/${MAIN_DB_NAME}`;
 
     if (fs.existsSync(path)) {
         return new Database(path)
     } else {
-        throw new Error(`Aucune base de donnée n'existe sous le nom ${databaseName}.`);
+        createDatabase();
+        return getDatabase();
     };
 };
 
 
 /**
  * Créer une base de données si elle n'existe pas.
- * @param {string} databaseName | Nom de la base de données à créer
  * @returns { Database }
  */
-const createDatabase = (databaseName) => {
-    if (!isValidDatabaseName(databaseName)) {
-        throw new Error(`Le nom de la base de données doit se terminer par .db`);
-    }
-
+const createDatabase = () => {
     createDatabaseDirectory();
 
-    let path = `${FOLDER_DB_NAME}/${databaseName}`
+    let path = `${FOLDER_DB_NAME}/${MAIN_DB_NAME}`;
 
-    if (fs.existsSync(path)) {
-        throw new Error(`Une base de données existe déjà sous le nom ${databaseName}.`);
-    } else {
-        return new Database(path);
-    };
-}
+    if (!fs.existsSync(path)) {
+        let db = new Database(path);
 
-
-/**
- * Vérifie si une base de données éxiste
- * @param {string} databaseName 
- * @returns { boolean }
- */
-const checkDatabaseExists = (databaseName) => {
-    if (!isValidDatabaseName(databaseName)) {
-        throw new Error(`Le nom de la base de données doit se terminer par .db`);
-    }
-
-    createDatabaseDirectory();
-
-    let path = `${FOLDER_DB_NAME}/${databaseName}`
-
-    return fs.existsSync(path);
-};
-
-
-
-// --------------------- MAIN DATABASE --------------------- //
-
-/**
- * Récupère la base de données principale, la crée si elle n'existe pas.
- * @returns { Database }
- */
-const getMainDatabase = () => {
-    if (!checkDatabaseExists(MAIN_DB_NAME)) {
-        let db = createDatabase(MAIN_DB_NAME);
-
-        initializeMainDatabase(db);
         logger.info(`La base de données principale a été créée sous le nom ${MAIN_DB_NAME}.`);
-    }
+        initializeDatabase(db);
 
-    return loadDatabase(MAIN_DB_NAME);
+        return db;
+    } else {
+        throw new Error(`Une base de données existe déjà sous le nom ${MAIN_DB_NAME}.`);
+    }
 }
+
 
 /**
  * Initialise la base de données principale.
  * @param { Database } db 
  */
-const initializeMainDatabase = (db) => {
+const initializeDatabase = (db) => {
     let requeteTableTournois = `CREATE TABLE IF NOT EXISTS ${MAIN_DB_TOURNAMENTS_TABLE} (
         idTournoi INTEGER PRIMARY KEY AUTOINCREMENT,
         nomTournoi TEXT NOT NULL,
         dateTournoi TEXT NOT NULL,
         nombreTerrains INTEGER NOT NULL,
-        databaseName TEXT NOT NULL,
         status TEXT NOT NULL DEFAULT '${TournamentStatus.UPCOMING}'
     );`;
 
@@ -148,8 +96,31 @@ const initializeMainDatabase = (db) => {
         value TEXT
     );`;
 
+    let requeteTableMatch = `CREATE TABLE IF NOT EXISTS ${MAIN_DB_MATCH_TABLE} (
+        idTournoi INTEGER,
+        idMatch INTEGER,
+
+        round TEXT NOT NULL,
+        category TEXT NOT NULL,
+
+        player1 TEXT NOT NULL,
+        player2 TEXT NOT NULL,
+        player1Set1 INTEGER,
+        player1Set2 INTEGER,
+        player1Set3 INTEGER,
+        player2Set1 INTEGER,
+        player2Set2 INTEGER,
+        player2Set3 INTEGER,
+
+        field INTEGER,
+        statut TEXT NOT NULL DEFAULT '${MatchStatus.NOT_PLAYED}',
+
+        PRIMARY KEY(idTournoi, idMatch)
+    )`
+
     db.prepare(requeteTableTournois).run();
     db.prepare(requeteTableSettings).run();
+    db.prepare(requeteTableMatch).run();
 }
 
 
@@ -158,56 +129,26 @@ const initializeMainDatabase = (db) => {
  * @param {string} tournamentName 
  * @param {string} tournamentDate 
  * @param {int} numberOfCourts 
- * @param {string} databaseName 
  */
 const registerNewTournament = (tournamentName, tournamentDate, numberOfCourts) => {
-    let databaseName = generateTournamentDatabaseName(tournamentName, tournamentDate);
-
     let insertTournament = `INSERT INTO ${MAIN_DB_TOURNAMENTS_TABLE} 
-    (nomTournoi, dateTournoi, nombreTerrains, databaseName) 
-    VALUES (?, ?, ?, ?);`;
+    (nomTournoi, dateTournoi, nombreTerrains) 
+    VALUES (?, ?, ?);`;
 
-    let mainDb = getMainDatabase();
-    mainDb.prepare(insertTournament).run(tournamentName, tournamentDate, numberOfCourts, databaseName);
-
-    let db = createDatabase(databaseName);
-    initializeTournamentDatabase(db);
+    let mainDb = getDatabase();
+    mainDb.prepare(insertTournament).run(tournamentName, tournamentDate, numberOfCourts);    
 };
-
-
-/**
- * Génère un nom de base de données unique pour un tournoi.
- * @param {string} tournamentName 
- * @param {string} tournamentDate 
- * @returns {string}
- */
-const generateTournamentDatabaseName = (tournamentName, tournamentDate) => {
-    let datePart = tournamentDate.replace(/-/g, "");
-    let namePart = tournamentName.replaceAll("-", "").trim().replace(/\s+/g, "_").toLowerCase();
-
-    if (checkDatabaseExists(`${namePart}-${datePart}.db`)) {
-        let counter = 1;
-
-        while (checkDatabaseExists(`${namePart}-${datePart}-${counter}.db`)) {
-            counter++;
-        }
-
-        return `${namePart}-${datePart}-${counter}.db`;
-    }
-
-    return `${namePart}-${datePart}.db`;
-}
 
 /**
  * Récupère la liste des tournois enregistrés dans la base de données principale.
  * @returns { Array }
  */
 const getTournamentList = () => {
-    let mainDb = getMainDatabase();
+    let mainDb = getDatabase();
 
-    let getTourneys = `SELECT * FROM ${MAIN_DB_TOURNAMENTS_TABLE};`;
-
-    return mainDb.prepare(getTourneys).all();
+    let getTournaments = `SELECT * FROM ${MAIN_DB_TOURNAMENTS_TABLE};`;
+    
+    return mainDb.prepare(getTournaments).all();
 }
 
 /**
@@ -219,7 +160,7 @@ const updateSetting = (key, value) => {
     let upsertSetting = `INSERT INTO ${MAIN_DB_SETTINGS_TABLE} (key, value) VALUES (?, ?)
     ON CONFLICT(key) DO UPDATE SET value = excluded.value;`;
 
-    let mainDb = getMainDatabase();
+    let mainDb = getDatabase();
     mainDb.prepare(upsertSetting).run(key, value);
 };
 
@@ -231,7 +172,7 @@ const updateSetting = (key, value) => {
 const getSetting = (key) => {
     let getSetting = `SELECT value FROM ${MAIN_DB_SETTINGS_TABLE} WHERE key = ?;`;
 
-    let mainDb = getMainDatabase();
+    let mainDb = getDatabase();
     let row = mainDb.prepare(getSetting).get(key);
 
     if (row) {
@@ -254,7 +195,7 @@ const updateTournamentName = (idTournoi, newName) => {
 
     let updateName = `UPDATE ${MAIN_DB_TOURNAMENTS_TABLE} SET nomTournoi = ? WHERE idTournoi = ?;`;
 
-    let mainDb = getMainDatabase();
+    let mainDb = getDatabase();
     mainDb.prepare(updateName).run(newName, idTournoi);
 };
 
@@ -270,7 +211,7 @@ const updateTournamentDate = (idTournoi, newDate) => {
 
     let updateDate = `UPDATE ${MAIN_DB_TOURNAMENTS_TABLE} SET dateTournoi = ? WHERE idTournoi = ?;`;
 
-    let mainDb = getMainDatabase();
+    let mainDb = getDatabase();
     mainDb.prepare(updateDate).run(newDate, idTournoi);
 };
 
@@ -290,98 +231,54 @@ const updateTournamentFields = (idTournoi, newNumberOfCourts) => {
 
     let updateFields = `UPDATE ${MAIN_DB_TOURNAMENTS_TABLE} SET nombreTerrains = ? WHERE idTournoi = ?;`;
 
-    let mainDb = getMainDatabase();
+    let mainDb = getDatabase();
     mainDb.prepare(updateFields).run(newNumberOfCourts, idTournoi);
 };
 
-// --------------------- OTHER DATABASE --------------------- //
-
-const listDatabases = () => {
-    createDatabaseDirectory();
-
-    let files = fs.readdirSync(FOLDER_DB_NAME);
-
-    files = files.filter(file =>
-        file.endsWith(".db") &&
-        file !== MAIN_DB_NAME
-    );
-
-    return files;
-}
+// --------------------- MATCH MANAGEMENT --------------------- //
 
 /**
- * Initialise une base de données de tournoi.
- * @param { Database } db 
- */
-const initializeTournamentDatabase = (db) => {
-    let requeteTableMatchs = `CREATE TABLE IF NOT EXISTS matchs (
-        idMatch INTEGER PRIMARY KEY,
-
-        round TEXT NOT NULL,
-        category TEXT NOT NULL,
-
-        joueur1 TEXT NOT NULL,
-        joueur2 TEXT NOT NULL,
-
-        player1Set1 INTEGER,
-        player2Set1 INTEGER,
-        player1Set2 INTEGER,
-        player2Set2 INTEGER,
-        player1Set3 INTEGER,
-        player2Set3 INTEGER,
-
-
-        field INTEGER,
-        winner TEXT,
-
-        statut TEXT NOT NULL DEFAULT '${MatchStatus.NOT_PLAYED}'
-    );`;
-
-    db.prepare(requeteTableMatchs).run();
-};
-
-/**
- * Enregistre des matchs dans une base de données de tournoi. La liste provient d'un fichier CSV.
- * @param { Database } db 
+ * Enregistre des matchs dans la base de données. La liste provient d'un fichier CSV.
+ * @param { Integer } idTournoi 
  * @param { Array<Array<string>> } matchs 
  */
-const registerMatchs = async (db, matchs) => {
-    return new Promise(async resolve => {
-        for (let i = 0; i < matchs.length; i++) {
-            let match = matchs[i];
+const registerMatchs = (idTournoi, matchs) => {
+    let mainDb = getDatabase();
+    
+    for (let i = 0; i < matchs.length; i++) {
+        let match = matchs[i];
 
-            if (match.length != NB_ELEMENTS_IN_MATCH_CSV) continue;
+        if (match.length != NB_ELEMENTS_IN_MATCH_CSV) continue;
+        
+        let insertMatch = `INSERT INTO ${MAIN_DB_MATCH_TABLE} 
+        (idTournoi, idMatch, category, round, player1, player2) 
+        VALUES (?, ?, ?, ?, ?, ?);`;
 
-            let insertMatch = `INSERT INTO matchs 
-        (idMatch, category, round, joueur1, joueur2) 
-        VALUES (?, ?, ?, ?, ?);`;
-
-            await db.prepare(insertMatch).run(
-                match[0], // idMatch
-                match[1], // category
-                match[2], // round
-                match[3], // player1
-                match[4]  // player2
-            );
-        }
-    })
-
+        mainDb.prepare(insertMatch).run(
+            idTournoi, 
+            match[0], // idMatch
+            match[1], // category
+            match[2], // round
+            match[3], // player1
+            match[4]  // player2
+        );
+    }
 }
 
 /**
  * Change le statut d'un match dans la base de données.
- * @param { Database } db 
+ * @param { int } idTournoi 
  * @param { int } matchId 
  * @param { MatchStatus } status 
  */
-const updateMatchStatus = (db, matchId, status) => {
+const updateMatchStatus = (idTournoi, matchId, status) => {
     if (matchId <= 0 || isNaN(matchId)) {
         throw new Error(`ID de match invalide : ${matchId}`);
     }
 
-    let matchDatas = getMatchDatas(db, matchId);
+    let matchDatas = getMatchDatas(idTournoi, matchId);
     if (!matchDatas) {
-        throw new Error(`Le match avec l'ID ${matchId} n'existe pas.`);
+        throw new Error(`Le match avec l'ID ${matchId} n'existe pas pour le tournoi ${idTournoi}.`);
     }
 
 
@@ -390,24 +287,24 @@ const updateMatchStatus = (db, matchId, status) => {
         throw new Error(`Statut de match invalide : ${status}`);
     }
 
-    let updateStatus = `UPDATE matchs SET statut = ? WHERE idMatch = ?;`;
+    let updateStatus = `UPDATE matchs SET statut = ? WHERE idMatch = ? AND idTournoi = ?;`;
 
-    db.prepare(updateStatus).run(status, matchId);
+    db.prepare(updateStatus).run(status, matchId, idTournoi);
 };
 
 
 /**
  * Change le numéro de terrain d'un match dans la base de données.
- * @param {Database} db 
+ * @param {int} idTournoi
  * @param {int} matchId 
  * @param {int} field 
  */
-const updateMatchField = (db, matchId, field) => {
+const updateMatchField = (iTournoi, matchId, field) => {
     if (matchId <= 0 || isNaN(matchId)) {
         throw new Error(`ID de match invalide : ${matchId}`);
     }
 
-    let matchDatas = getMatchDatas(db, matchId);
+    let matchDatas = getMatchDatas(idTournoi, matchId);
     if (!matchDatas) {
         throw new Error(`Le match avec l'ID ${matchId} n'existe pas.`);
     }
@@ -415,59 +312,29 @@ const updateMatchField = (db, matchId, field) => {
     if (field <= 0 || isNaN(field)) {
         throw new Error(`Numéro de terrain invalide : ${field}`);
     }
+    
+    
+    let updateField = `UPDATE matchs SET field = ? WHERE idMatch = ? AND idTournoi = ?;`;
 
-
-    let updateField = `UPDATE matchs SET field = ? WHERE idMatch = ?;`;
-
-    db.prepare(updateField).run(field, matchId);
+    db.prepare(updateField).run(field, matchId, idTournoi);
 }
 
-/**
- * Change le gagnant d'un match dans la base de données.
- * @param {Database} db 
- * @param {int} matchId 
- * @param {string} winner 
- */
-const updateMatchWinner = (db, matchId, winner) => {
-    if (matchId <= 0 || isNaN(matchId)) {
-        throw new Error(`ID de match invalide : ${matchId}`);
-    }
 
-    let matchDatas = getMatchDatas(db, matchId);
-    if (!matchDatas) {
-        throw new Error(`Le match avec l'ID ${matchId} n'existe pas.`);
-    }
-
-    // if (winner !== matchDatas.joueur1 && winner !== matchDatas.joueur2) {
-    //     throw new Error(`Le gagnant spécifié (${winner}) n'est pas un des joueurs du match ${matchId}.`);
-    // }
-
-    if (
-        matchDatas.statut === MatchStatus.NOT_PLAYED ||
-        matchDatas.statut === MatchStatus.IN_PROGRESS
-    ) {
-        throw new Error(`Le match avec l'ID ${matchId} n'a pas encore terminé. Impossible de définir un gagnant.`);
-    }
-
-    let updateWinner = `UPDATE matchs SET winner = ? WHERE idMatch = ?;`;
-
-    db.prepare(updateWinner).run(winner, matchId);
-};
 
 /**
  * Permet de récupérer les données d'un match à partir de son identifiant.
- * @param { Database } db Base de données où se situe le match
+ * @param { int } idTournoi Identifiant du tournoi
  * @param { int } matchId Identifiant du match
  * @returns { Object }
  */
-const getMatchDatas = (db, matchId) => {
+const getMatchDatas = (idTournoi, matchId) => {
     if (matchId <= 0 || isNaN(matchId)) {
         throw new Error(`ID de match invalide : ${matchId}`);
     }
 
-    let getStatus = `SELECT * FROM matchs WHERE idMatch = ?;`;
+    let getStatus = `SELECT * FROM matchs WHERE idMatch = ? AND idTournoi = ?;`;
 
-    let row = db.prepare(getStatus).get(matchId);
+    let row = db.prepare(getStatus).get(matchId, idTournoi);
 
     if (row) {
         return row;
@@ -478,16 +345,16 @@ const getMatchDatas = (db, matchId) => {
 
 /**
  * Met à jour le score d'un match dans la base de données.
- * @param { Database } db 
+ * @param { int } idTournoi
  * @param { int } matchId 
  * @param { Object } score 
  */
-const updateMatchScore = (db, matchId, score) => {
+const updateMatchScore = (idTournoi, matchId, score) => {
     if (matchId <= 0 || isNaN(matchId)) {
         throw new Error(`ID de match invalide : ${matchId}`);
     }
 
-    let matchDatas = getMatchDatas(db, matchId);
+    let matchDatas = getMatchDatas(idTournoi, matchId);
     if (!matchDatas) {
         throw new Error(`Le match avec l'ID ${matchId} n'existe pas.`);
     }
@@ -496,13 +363,13 @@ const updateMatchScore = (db, matchId, score) => {
     SET player1Set1 = ?, player2Set1 = ?, 
         player1Set2 = ?, player2Set2 = ?, 
         player1Set3 = ?, player2Set3 = ? 
-    WHERE idMatch = ?;`;
+    WHERE idMatch = ? AND idTournoi = ?;`;
 
     db.prepare(updateScore).run(
         score.player1Set1, score.player2Set1,
         score.player1Set2, score.player2Set2,
         score.player1Set3, score.player2Set3,
-        matchId
+        matchId, idTournoi
     );
 };
 
@@ -516,26 +383,23 @@ const getTournamentDatas = (idTournoi) => {
         throw new Error(`ID de tournoi invalide : ${idTournoi}`);
     }
 
-    let getInfos = `SELECT nomTournoi, dateTournoi, nombreTerrains, status, databaseName FROM ${MAIN_DB_TOURNAMENTS_TABLE} WHERE idTournoi = ?;`;
+    let infosQuery = `SELECT * FROM ${MAIN_DB_TOURNAMENTS_TABLE} WHERE idTournoi = ?;`;
 
-    let mainDb = getMainDatabase();
-    let tournamentInfo = mainDb.prepare(getInfos).get(idTournoi);
+    let tournamentInfo = getDatabase().prepare(infosQuery).get(idTournoi);
 
-    let tournamentDb = loadDatabase(tournamentInfo.databaseName);
+    let matchQuery = `SELECT * FROM ${MAIN_DB_MATCH_TABLE} WHERE idTournoi = ?;`;
+    let matchs = getDatabase().prepare(matchQuery).all(idTournoi);
 
     return {
         tournamentInfos: { ...tournamentInfo },
-        matchs: tournamentDb.prepare(`SELECT * FROM matchs;`).all()
+        matchs
     };
 }
 
 
 module.exports = {
-    getMainDatabase,
+    getDatabase,
     createDatabase,
-    loadDatabase,
-    checkDatabaseExists,
-    listDatabases,
     registerNewTournament,
     registerMatchs,
     updateMatchStatus,
@@ -547,7 +411,6 @@ module.exports = {
     getSetting,
     updateMatchField,
     updateMatchScore,
-    updateMatchWinner,
     updateTournamentDate,
     updateTournamentFields,
     updateTournamentName
