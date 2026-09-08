@@ -9,10 +9,12 @@ const { TournamentStatus } = require('../enums/TournamentStatus');
 
 const logger = require("../managers/logManager");
 
+const { calculateAverages, initStats } = require('../handler/scoreCalculator');
+
 // ------------------------ //
 //        CONSTANTES        //
 // ------------------------ //
-const FOLDER_DB_NAME = "databases";
+const FOLDER_DB_NAME = "dbTest";
 const MAIN_DB_NAME = "main.db";
 
 const MAIN_DB_TOURNAMENTS_TABLE = "tournois";
@@ -116,11 +118,27 @@ const initializeDatabase = (db) => {
         statut TEXT NOT NULL DEFAULT '${MatchStatus.NOT_PLAYED}',
 
         PRIMARY KEY(idTournoi, idMatch)
-    )`
+    )`;
+
+    let requestViewPlayers = `
+        CREATE VIEW players AS
+        SELECT *
+        FROM (
+            SELECT player1 AS p, idTournoi, round, category
+            FROM matchs
+
+            UNION
+
+            SELECT player2 AS p, idTournoi, round, category
+            FROM matchs
+        )
+        WHERE p != 'VIDE';
+    `;
 
     db.prepare(requeteTableTournois).run();
     db.prepare(requeteTableSettings).run();
     db.prepare(requeteTableMatch).run();
+    db.prepare(requestViewPlayers).run();
 }
 
 
@@ -136,7 +154,7 @@ const registerNewTournament = (tournamentName, tournamentDate, numberOfCourts) =
     VALUES (?, ?, ?);`;
 
     let mainDb = getDatabase();
-    mainDb.prepare(insertTournament).run(tournamentName, tournamentDate, numberOfCourts);    
+    mainDb.prepare(insertTournament).run(tournamentName, tournamentDate, numberOfCourts);
 };
 
 /**
@@ -147,7 +165,7 @@ const getTournamentList = () => {
     let mainDb = getDatabase();
 
     let getTournaments = `SELECT * FROM ${MAIN_DB_TOURNAMENTS_TABLE};`;
-    
+
     return mainDb.prepare(getTournaments).all();
 }
 
@@ -244,18 +262,18 @@ const updateTournamentFields = (idTournoi, newNumberOfCourts) => {
  */
 const registerMatchs = (idTournoi, matchs) => {
     let mainDb = getDatabase();
-    
+
     for (let i = 0; i < matchs.length; i++) {
         let match = matchs[i];
 
         if (match.length != NB_ELEMENTS_IN_MATCH_CSV) continue;
-        
+
         let insertMatch = `INSERT INTO ${MAIN_DB_MATCH_TABLE} 
         (idTournoi, idMatch, category, round, player1, player2) 
         VALUES (?, ?, ?, ?, ?, ?);`;
 
         mainDb.prepare(insertMatch).run(
-            idTournoi, 
+            idTournoi,
             match[0], // idMatch
             match[1], // category
             match[2], // round
@@ -312,8 +330,8 @@ const updateMatchField = (iTournoi, matchId, field) => {
     if (field <= 0 || isNaN(field)) {
         throw new Error(`Numéro de terrain invalide : ${field}`);
     }
-    
-    
+
+
     let updateField = `UPDATE matchs SET field = ? WHERE idMatch = ? AND idTournoi = ?;`;
 
     db.prepare(updateField).run(field, matchId, idTournoi);
@@ -397,6 +415,92 @@ const getTournamentDatas = (idTournoi) => {
 }
 
 
+
+const getPools = (idTournoi) => {
+
+
+    let request = `
+        SELECT *
+        FROM players
+        WHERE idTournoi = ?;
+    `;
+
+    let result = getDatabase().prepare(request).all(idTournoi);
+
+    let pools = {};
+
+    for (let row of result) {
+
+        let { p, round, category } = row;
+
+        if (!pools[category]) {
+            pools[category] = {};
+        }
+
+        if (!pools[category][round]) {
+            pools[category][round] = [];
+        }
+
+        if (!pools[category][round].includes(p)) {
+            pools[category][round].push(p);
+        };
+    }
+
+    return pools;
+};
+
+/**
+ * Récupère le score d'un pool pour un tournoi donné. Pour chaque personne, cela renvoie le nombre de matchs gagnés et perdus, le set-average et le point-average.
+ * @param {*} idTournoi 
+ * @param {*} category 
+ * @param {*} poolId 
+ */
+const getPoolScore = (idTournoi) => {
+    let request = `
+        SELECT
+            idMatch,
+            player1,
+            player2,
+            pl.round,
+            pl.category,
+            player1Set1, player1Set2, player1Set3,
+            player2Set1, player2Set2, player2Set3,
+            statut
+        FROM players pl
+        INNER JOIN matchs m
+            ON player1 = p AND m.round = pl.round AND m.category = pl.category
+        WHERE pl.idTournoi = ?;
+    `;
+
+    let result = getDatabase().prepare(request).all(idTournoi);
+
+    let scores = calculateAverages(result);
+
+    let pools = getPools(idTournoi);
+    let stats = {}
+
+    for (let category in pools) {
+        stats[category] = {};
+
+        for (let round in pools[category]) {
+            stats[category][round] = {};
+
+            for (let player of pools[category][round]) {
+
+                if (!scores[`${player}_${round}_${category}`]) {
+                    stats[category][round][player] = initStats(player, round, category);
+                } else {
+                    stats[category][round][player] = scores[`${player}_${round}_${category}`];
+                }
+            }
+        }
+    }
+
+
+    return stats;    
+}
+
+
 module.exports = {
     getDatabase,
     createDatabase,
@@ -413,5 +517,7 @@ module.exports = {
     updateMatchScore,
     updateTournamentDate,
     updateTournamentFields,
-    updateTournamentName
+    updateTournamentName,
+    getPools,
+    getPoolScore
 }

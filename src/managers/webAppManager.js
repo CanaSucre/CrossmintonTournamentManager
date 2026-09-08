@@ -6,6 +6,8 @@ const path = require('path')
 const express = require('express');
 const { createServer } = require('node:http');
 
+const cors = require('cors');
+
 const config = require("../../config");
 
 const logger = require('../managers/logManager');
@@ -17,7 +19,7 @@ const server = createServer(app);
 
 app.use(express.static(path.join(__dirname, "../../web/public")))
 app.use(express.static(path.join(__dirname, "../../web/pages")))
-
+app.use(cors());
 
 // ------------------------ //
 //        PROGRAMME         //

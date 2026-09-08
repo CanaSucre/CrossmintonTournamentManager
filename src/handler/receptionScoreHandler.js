@@ -102,6 +102,7 @@ const processData = async (data, field) => {
   let unknownMatch = matchDatas ? false : true; 
   if (unknownMatch) {
 
+    // TODO : Adapter au nouveau fonctionnement de la DB
     await dbManager.registerMatchs(
       tournamentDb,
       [
