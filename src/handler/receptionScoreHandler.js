@@ -8,6 +8,8 @@ const websocketManager = require("../managers/websocketManager");
 const logger = require('../managers/logManager');
 
 const { MatchStatus } = require("../enums/MatchStatus")
+
+const { getMatchWinner, getSetWinner } = require("./scoreCalculator");
 // ------------------------ //
 //     INITIALISATIONS      //
 // ------------------------ //
@@ -212,62 +214,6 @@ const checkDataValidity = (data, field, isTest = false) => {
    * - Si le gagnant est indiqué, alors le score doit correspondre à une victoire (ex : pas de gagnant si le score est 1-1 en 2 sets gagnants)
    */
   return true;
-}
-
-
-/**
- * Vérifie si le match est gagné par l'un des joueurs en fonction des scores indiqués. Si oui, indique le gagnant.
- * @param {Object} data Données reçues par l'application
- * @returns {String} Le nom du gagnant si le match est gagné, null sinon
- */
-const getMatchWinner = (data) => {
-  let player1SetsWon = 0;
-  let player2SetsWon = 0;
-
-  for (let i = 1; i <= 3; i++) {
-    let player1Score = data[`player1Set${i}`];
-    let player2Score = data[`player2Set${i}`];
-
-    let setWinner = getSetWinner(player1Score, player2Score);
-    if (setWinner === 1) {
-      player1SetsWon++;
-    } else if (setWinner === 2) {
-      player2SetsWon++;
-    }
-  }
-
-  if (player1SetsWon == 2) {
-    return data.player1;
-  } else if (player2SetsWon == 2) {
-    return data.player2;
-  } else {
-    return null; // Match non terminé
-  }
-
-}
-
-const getSetWinner = (player1Score, player2Score) => {
-  if (player1Score == '' || player2Score == '') {
-    // Set pas encore joué
-    return null;
-  }
-
-  if (player1Score < 16 && player2Score < 16) {
-    // Aucun des 2 joueurs n'a assez de point pour gagner le set
-    return null;
-  }
-  
-  
-  let delta = Math.abs(player1Score - player2Score); // Différence de points entre les 2 joueurs
-
-  // Le joueur a plus de 16 points, a plus de points que sont adversaire et a au moins 2 points d'écart
-  if (player1Score >= 16 && player1Score > player2Score && delta >= 2) {
-    return 1;
-  } else if (player2Score >= 16 && player2Score > player1Score && delta >= 2) {
-    return 2;
-  } else {
-    return null; // Si pas toutes ces conditions, set non fini
-  }
 }
 
 const checkApero = (data) => {
