@@ -77,6 +77,7 @@ module.exports = {
             databaseManager.updateTournamentName(tournamentId, data.nom);
             databaseManager.updateTournamentDate(tournamentId, data.date);
             databaseManager.updateTournamentFields(tournamentId, data.terrains);
+            databaseManager.updateTournamentType(tournamentId, data.type);
 
             liveTournamentId = databaseManager.getSetting("live_tournament");
 

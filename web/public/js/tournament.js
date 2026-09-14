@@ -28,6 +28,7 @@ socket.once("load", (data) => {
     document.getElementById('nom').value = data.tournamentInfos.nomTournoi;
     document.getElementById('date').value = data.tournamentInfos.dateTournoi;
     document.getElementById('nombreTerrains').value = data.tournamentInfos.nombreTerrains;
+    document.getElementById('typeTournament').value = data.tournamentInfos.type;
 
     loadTournamentDatas();
 });
@@ -435,15 +436,18 @@ document.getElementById('editForm').addEventListener('submit', function (event) 
         nom: document.getElementById('nom').value,
         date: document.getElementById('date').value,
         terrains: document.getElementById('nombreTerrains').value,
+        type: document.getElementById('typeTournament').value
     };
 
     tournamentDatas.tournamentInfos.nomTournoi = data.nom;
     tournamentDatas.tournamentInfos.dateTournoi = data.date;
     tournamentDatas.tournamentInfos.nombreTerrains = data.terrains;
+    tournamentDatas.tournamentInfos.typeTournoi = data.type;
 
     document.getElementById('nom').value = data.nom;
     document.getElementById('date').value = data.date;
     document.getElementById('nombreTerrains').value = data.terrains;
+    document.getElementById('typeTournament').value = data.type;
 
     masquerErreur();
 

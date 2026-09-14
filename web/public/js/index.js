@@ -58,7 +58,10 @@ function loadTournaments(tournaments, tournamentLive) {
                 </div>
             </div>
 
-            <p class="col-12">Date : ${tournament.dateTournoi}</p>
+            <div class="d-flex justify-content-between">
+                <p class="col-6">Date : ${tournament.dateTournoi}</p>
+                <p class="col-6 text-end">${tournament.type}</p>
+            </div>
         `
 
         // Ajout du tournoi au lien et du lien au container
@@ -92,29 +95,31 @@ function getColorByStatus(status) {
 
 
 document.getElementById('ajoutForm').addEventListener('submit', function (event) {
-    event.preventDefault(); // empêche l'envoi classique
+	event.preventDefault(); // empêche l'envoi classique
 
-    if (!document.getElementById('nom').value || !document.getElementById('date').value || !document.getElementById('nombreTerrains').value) {
-        afficherErreurFormulaire("Veuillez remplir tous les champs.");
-        return;
-    }
+	if (!document.getElementById('nom').value || !document.getElementById('date').value || !document.getElementById('nombreTerrains').value) {
+			afficherErreurFormulaire("Veuillez remplir tous les champs.");
+			return;
+	}
 
-    const data = {
-      nom: document.getElementById('nom').value,
-      date: document.getElementById('date').value,
-      terrains: document.getElementById('nombreTerrains').value,
-    };
+	const data = {
+		nom: document.getElementById('nom').value,
+		date: document.getElementById('date').value,
+		terrains: document.getElementById('nombreTerrains').value,
+		type: document.getElementById('typeTournament').value
+	};
 
-    document.getElementById('nom').value = '';
-    document.getElementById('date').value = '';
-    document.getElementById('nombreTerrains').value = '';
+	document.getElementById('nom').value = '';
+	document.getElementById('date').value = '';
+	document.getElementById('nombreTerrains').value = '';
+	document.getElementById('typeTournament').value = '';
 
-    masquerErreur();
+	masquerErreur();
 
-    socket.emit('createTournament', data);
+	socket.emit('createTournament', data);
 
-    const modal = bootstrap.Modal.getInstance(document.getElementById('ajoutModal'));
-    modal.hide();
+	const modal = bootstrap.Modal.getInstance(document.getElementById('ajoutModal'));
+	modal.hide();
 });
 
 

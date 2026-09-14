@@ -17,7 +17,7 @@ module.exports = {
         
 
         socket.on("createTournament", (datas) => {
-            databaseManager.registerNewTournament(datas.nom, datas.date, datas.terrains);
+            databaseManager.registerNewTournament(datas.nom, datas.date, datas.terrains, datas.type);
 
             socketServ.of("/index").emit("load", {
                 tournaments: databaseManager.getTournamentList(),

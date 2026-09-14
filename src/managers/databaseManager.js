@@ -90,6 +90,7 @@ const initializeDatabase = (db) => {
         nomTournoi TEXT NOT NULL,
         dateTournoi TEXT NOT NULL,
         nombreTerrains INTEGER NOT NULL,
+        type TEXT NOT NULL DEFAULT 'Simple',
         status TEXT NOT NULL DEFAULT '${TournamentStatus.UPCOMING}'
     );`;
 
@@ -147,14 +148,15 @@ const initializeDatabase = (db) => {
  * @param {string} tournamentName 
  * @param {string} tournamentDate 
  * @param {int} numberOfCourts 
+ * @param {string} tournamentType
  */
-const registerNewTournament = (tournamentName, tournamentDate, numberOfCourts) => {
+const registerNewTournament = (tournamentName, tournamentDate, numberOfCourts, tournamentType) => {
     let insertTournament = `INSERT INTO ${MAIN_DB_TOURNAMENTS_TABLE} 
-    (nomTournoi, dateTournoi, nombreTerrains) 
-    VALUES (?, ?, ?);`;
+    (nomTournoi, dateTournoi, nombreTerrains, type) 
+    VALUES (?, ?, ?, ?);`;
 
     let mainDb = getDatabase();
-    mainDb.prepare(insertTournament).run(tournamentName, tournamentDate, numberOfCourts);
+    mainDb.prepare(insertTournament).run(tournamentName, tournamentDate, numberOfCourts, tournamentType);
 };
 
 /**
@@ -252,6 +254,22 @@ const updateTournamentFields = (idTournoi, newNumberOfCourts) => {
     let mainDb = getDatabase();
     mainDb.prepare(updateFields).run(newNumberOfCourts, idTournoi);
 };
+
+
+const updateTournamentType = (idTournoi, newType) => {
+    if (idTournoi <= 0 || isNaN(idTournoi)) {
+        throw new Error(`ID de tournoi invalide : ${idTournoi}`);
+    };
+
+    if (!newType || typeof newType !== 'string') {
+        throw new Error(`Type de tournoi invalide : ${newType}`);
+    }
+
+    let updateType = `UPDATE ${MAIN_DB_TOURNAMENTS_TABLE} SET type = ? WHERE idTournoi = ?;`;
+
+    let mainDb = getDatabase();
+    mainDb.prepare(updateType).run(newType, idTournoi);
+}
 
 // --------------------- MATCH MANAGEMENT --------------------- //
 
@@ -518,6 +536,7 @@ module.exports = {
     updateTournamentDate,
     updateTournamentFields,
     updateTournamentName,
+    updateTournamentType,
     getPools,
     getPoolScore
 }
