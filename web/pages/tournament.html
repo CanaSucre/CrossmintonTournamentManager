@@ -151,16 +151,24 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
 
+        <div class="modal-body">
+          <form id="confirmForm">
+            <div class="mb-3">
+              <label class="form-label" id="modalConfirmMsg">Êtes-vous sûr de vouloir effectuer cette action ?</label>
+            </div>
+          </form>
+        </div>
+
         <div class="modal-footer">
           <button class="btn btn-success" data-bs-dismiss="modal">Annuler</button>
-          <button class="btn btn-danger" type="submit" form="ajoutForm">Confirmer</button>
+          <button class="btn btn-danger" type="submit" form="confirmForm">Confirmer</button>
         </div>
 
       </div>
     </div>
   </div>
 
-   <div class="modal fade" id="loadMatchModal" tabindex="-1" aria-hidden="true">
+  <div class="modal fade" id="loadMatchModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
 

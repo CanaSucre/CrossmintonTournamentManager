@@ -241,20 +241,30 @@ function loadActionBarButtons() {
 
     switch (tournamentDatas.tournamentInfos.status) {
         case "Upcoming": {
-            actionBarBtn.innerHTML += `<button id="nextStatus" type="button" class="btn btn-success col-2"><i class="bi bi-play-fill"></i> Démarrer</button>`;
+            actionBarBtn.innerHTML += `<button id="nextStatus" data-bs-toggle="modal" data-bs-target="#confirmModal" type="button" class="btn btn-success col-2"><i class="bi bi-play-fill"></i> Démarrer</button>`;
             break;
         };
 
         case "Ongoing": {
-            actionBarBtn.innerHTML += `<button id="nextStatus" type="button" class="btn btn-danger col-2"><i class="bi bi-stop-fill"></i> Terminer</button>`;
+            actionBarBtn.innerHTML += `<button id="nextStatus" data-bs-toggle="modal" data-bs-target="#confirmModal" type="button" class="btn btn-danger col-2"><i class="bi bi-stop-fill"></i> Terminer</button>`;
             break;
         };
 
         case "Completed": {
-            actionBarBtn.innerHTML += `<button id="nextStatus" type="button" class="btn btn-secondary col-2" disabled><i class="bi bi-pause-fill"></i> Terminé</button>`;
+            actionBarBtn.innerHTML += `<button id="nextStatus" data-bs-toggle="modal" data-bs-target="#confirmModal" type="button" class="btn btn-secondary col-2" disabled><i class="bi bi-pause-fill"></i> Terminé</button>`;
             break;
         };
     };
+
+
+    document.getElementById('nextStatus').addEventListener('click', function () {
+
+        let nextStatus = getNextStatus(tournamentDatas.tournamentInfos.status);
+
+        let modalConfirmMsg = document.getElementById('modalConfirmMsg');
+        modalConfirmMsg.innerText = `Êtes-vous sûr de vouloir changer le statut du tournoi en "${nextStatus}" ?`;
+
+    })
 
     reloadEventsActionbar();
 }
@@ -421,6 +431,14 @@ function reloadEventsActionbar() {
 }
 
 
+function getNextStatus(currentStatus) {
+    switch (currentStatus) {
+        case "Upcoming":
+            return "Ongoing";
+        case "Ongoing":
+            return "Completed";
+    }
+};
 
 
 document.getElementById('editForm').addEventListener('submit', function (event) {
@@ -479,6 +497,15 @@ document.getElementById('loadMatchForm').addEventListener('submit', function (ev
     loadTournamentDatas();
     const modal = bootstrap.Modal.getInstance(document.getElementById('loadMatchModal'));
     modal.hide()
+});
+
+document.getElementById('confirmForm').addEventListener('submit', function (event) {
+    event.preventDefault(); // empêche l'envoi classique
+
+    socket.emit('changeTournamentStatus', getNextStatus(tournamentDatas.tournamentInfos.status));
+    const modal = bootstrap.Modal.getInstance(document.getElementById('confirmModal'));
+
+    modal.hide();
 });
 
 /**

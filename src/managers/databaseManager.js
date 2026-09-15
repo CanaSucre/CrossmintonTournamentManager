@@ -271,6 +271,21 @@ const updateTournamentType = (idTournoi, newType) => {
     mainDb.prepare(updateType).run(newType, idTournoi);
 }
 
+const updateTournamentStatus = (idTournoi, newStatus) => {
+    if (idTournoi <= 0 || isNaN(idTournoi)) {
+        throw new Error(`ID de tournoi invalide : ${idTournoi}`);
+    }
+
+    if (!Object.values(TournamentStatus).includes(newStatus)) {
+        throw new Error(`Statut de tournoi invalide : ${newStatus}`);
+    }
+
+    let updateStatus = `UPDATE ${MAIN_DB_TOURNAMENTS_TABLE} SET status = ? WHERE idTournoi = ?;`;
+
+    let mainDb = getDatabase();
+    mainDb.prepare(updateStatus).run(newStatus, idTournoi);
+}
+
 // --------------------- MATCH MANAGEMENT --------------------- //
 
 /**
@@ -534,6 +549,7 @@ module.exports = {
     updateMatchField,
     updateMatchScore,
     updateTournamentDate,
+    updateTournamentStatus,
     updateTournamentFields,
     updateTournamentName,
     updateTournamentType,

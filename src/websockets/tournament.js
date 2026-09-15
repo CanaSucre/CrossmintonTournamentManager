@@ -105,5 +105,18 @@ module.exports = {
                 logger.error(`Erreur lors du parsing des matchs CSV : ${error.message}`);
             }
         });
+
+        socket.on("changeTournamentStatus", (status) => {
+
+            databaseManager.updateTournamentStatus(tournamentId, status);
+
+            liveTournamentId = databaseManager.getSetting("live_tournament");
+
+            socketServ.of(`/tournament/${tournamentId}`).emit("reload", {
+                ...databaseManager.getTournamentDatas(tournamentId),
+                isLive: liveTournamentId && liveTournamentId == tournamentId ? true: false,
+                liveEnabled: liveTournamentId ? true: false
+            });
+        });
     }
 }
