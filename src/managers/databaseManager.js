@@ -9,7 +9,7 @@ const { TournamentStatus } = require('../enums/TournamentStatus');
 
 const logger = require("../managers/logManager");
 
-const { calculateAverages, initStats } = require('../handler/scoreCalculator');
+const { calculateAverages, initStats, getMatchWinner } = require('../handler/scoreCalculator');
 
 // ------------------------ //
 //        CONSTANTES        //
@@ -440,6 +440,17 @@ const getTournamentDatas = (idTournoi) => {
 
     let matchQuery = `SELECT * FROM ${MAIN_DB_MATCH_TABLE} WHERE idTournoi = ?;`;
     let matchs = getDatabase().prepare(matchQuery).all(idTournoi);
+
+    matchs.map(m => {
+        if (m.statut === MatchStatus.COMPLETED) {
+            let winner = getMatchWinner(m);
+            m.winner = winner;
+        } else {
+            m.winner = null;
+        ;}
+
+        return m;
+    });
 
     return {
         tournamentInfos: { ...tournamentInfo },
