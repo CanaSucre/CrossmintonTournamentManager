@@ -117,6 +117,7 @@ const initializeDatabase = (db) => {
 
         field INTEGER,
         statut TEXT NOT NULL DEFAULT '${MatchStatus.NOT_PLAYED}',
+        type TEXT NOT NULL DEFAULT 'pool',
 
         PRIMARY KEY(idTournoi, idMatch)
     )`;
@@ -127,11 +128,13 @@ const initializeDatabase = (db) => {
         FROM (
             SELECT player1 AS p, idTournoi, round, category
             FROM matchs
+			WHERE type = 'pool'
 
             UNION
 
             SELECT player2 AS p, idTournoi, round, category
             FROM matchs
+			WHERE type = 'pool'
         )
         WHERE p != 'VIDE';
     `;
@@ -302,8 +305,10 @@ const registerMatchs = (idTournoi, matchs) => {
         if (match.length != NB_ELEMENTS_IN_MATCH_CSV) continue;
 
         let insertMatch = `INSERT INTO ${MAIN_DB_MATCH_TABLE} 
-        (idTournoi, idMatch, category, round, player1, player2) 
-        VALUES (?, ?, ?, ?, ?, ?);`;
+        (idTournoi, idMatch, category, round, player1, player2, type) 
+        VALUES (?, ?, ?, ?, ?, ?, ?);`;
+
+        let regexIsPool = /^[0-9]*$/g;
 
         mainDb.prepare(insertMatch).run(
             idTournoi,
@@ -311,7 +316,8 @@ const registerMatchs = (idTournoi, matchs) => {
             match[1], // category
             match[2], // round
             match[3], // player1
-            match[4]  // player2
+            match[4],  // player2
+            regexIsPool.test(match[2]) ? "pool" : "bracket"
         );
     }
 }

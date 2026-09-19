@@ -275,8 +275,8 @@ function loadActionBarButtons() {
  * @returns {Array}
  */
 function getPlayerList() {
-    let playersOne = tournamentDatas.matchs.map(match => match.player1);
-    let playersTwo = tournamentDatas.matchs.map(match => match.player2);
+    let playersOne = tournamentDatas.matchs.filter(m => m.type == "pool").map(match => match.player1);
+    let playersTwo = tournamentDatas.matchs.filter(m => m.type == "pool").map(match => match.player2);
     let allPlayers = playersOne.concat(playersTwo);
 
     let uniquePlayers = Array.from(new Set(allPlayers));
