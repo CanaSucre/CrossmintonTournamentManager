@@ -1,6 +1,6 @@
 const { getPoolScore } = require('../managers/databaseManager');
 const dbManager = require("../managers/databaseManager");
-
+const { orderPoolsStats } = require('../handler/scoreCalculator');
 
 
 module.exports = {
@@ -15,6 +15,8 @@ module.exports = {
         }
 
         let pools = getPoolScore(currentTournamentLive);
+
+        orderPoolsStats(pools);
 
         res.send(pools);
     }

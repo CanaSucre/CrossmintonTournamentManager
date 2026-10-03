@@ -141,9 +141,57 @@ const initStats = (name, round, category) => {
 }
 
 
+const orderPoolsStats = (poolDatas) => {
+  for (const category in poolDatas) {
+    for (const poolId in poolDatas[category]) {
+      let poolStats = poolDatas[category][poolId];
+
+      
+
+      orderPoolStats(poolStats);
+    }
+  }
+}
+
+const orderPoolStats = (poolDatas) => {
+  const ratio = (numerator, denominator) => denominator ? numerator / denominator : 0;
+
+  
+  Object.keys(poolDatas)
+    .sort((a, b) => {
+      a = poolDatas[a];
+      b = poolDatas[b];
+
+
+      let aNbSetLost = a.nbSetsPlayed - a.nbSetsWon;
+      let bNbSetLost = b.nbSetsPlayed - b.nbSetsWon;
+
+      let aNbPointsLost = a.nbPointsPlayed - a.nbPointsWon;
+      let bNbPointsLost = b.nbPointsPlayed - b.nbPointsWon;
+
+      if (a.nbMatchsWon !== b.nbMatchsWon) return b.nbMatchsWon - a.nbMatchsWon;
+    
+      const aSetsRatio = ratio(a.nbSetsWon, aNbSetLost);
+      const bSetsRatio = ratio(b.nbSetsWon, bNbSetLost);
+      if (aSetsRatio !== bSetsRatio) return bSetsRatio - aSetsRatio;
+    
+      const aPointsRatio = ratio(a.nbPointsWon, aNbPointsLost);
+      const bPointsRatio = ratio(b.nbPointsWon, bNbPointsLost);
+
+      return bPointsRatio - aPointsRatio;
+    })
+    .map((key, index) => {
+      poolDatas[key].rank = index + 1;
+    });
+
+  console.log(poolDatas);
+  return poolDatas;
+}
+
 module.exports = {
   calculateAverages,
   getSetWinner,
   getMatchWinner,
-  initStats
+  initStats,
+  orderPoolsStats
 };
