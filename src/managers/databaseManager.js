@@ -551,6 +551,15 @@ const getPoolScore = (idTournoi) => {
 }
 
 
+const getBracketsMatchsOfCategory = (idTournoi, category) => {
+    let request = `SELECT * FROM ${MAIN_DB_MATCH_TABLE} WHERE idTournoi = ? AND category = ? AND type = 'bracket';`;
+
+    let result = getDatabase().prepare(request).all(idTournoi, category);
+
+    return result;
+};
+
+
 module.exports = {
     getDatabase,
     createDatabase,
@@ -571,5 +580,6 @@ module.exports = {
     updateTournamentName,
     updateTournamentType,
     getPools,
-    getPoolScore
+    getPoolScore,
+    getBracketsMatchsOfCategory,
 }

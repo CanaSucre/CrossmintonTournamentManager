@@ -193,5 +193,5 @@ module.exports = {
   getSetWinner,
   getMatchWinner,
   initStats,
-  orderPoolsStats
+  orderPoolsStats,
 };
