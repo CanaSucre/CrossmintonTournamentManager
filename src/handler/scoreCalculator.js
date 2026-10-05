@@ -184,7 +184,6 @@ const orderPoolStats = (poolDatas) => {
       poolDatas[key].rank = index + 1;
     });
 
-  console.log(poolDatas);
   return poolDatas;
 }
 

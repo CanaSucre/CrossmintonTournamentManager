@@ -1,7 +1,5 @@
-const { join } = require('node:path');
-
 const dbManager = require("../managers/databaseManager");
-const { generateCategoryBracket } = require('../handler/bracketCalculator');
+const { generateCategoryBracket, replaceTargetByName } = require('../handler/bracketCalculator');
 
 module.exports = {
     redirection: "/liveBracket/:category",
@@ -20,13 +18,15 @@ module.exports = {
             return;
         }
 
-        let bracketDatas =generateCategoryBracket(currentTournamentLive, req.params.category);
+        let bracketDatas = generateCategoryBracket(currentTournamentLive, req.params.category);
 
         if (bracketDatas === undefined) {
             res.status(400).send("Impossible de générer le bracket pour la catégorie demandée. Celle-ci n'existe peut-être pas ou n'a pas encore de matchs.");
             return;
         }
 
-        res.send(bracketDatas);
+        let replacement = replaceTargetByName(currentTournamentLive, 'bracket', bracketDatas);
+
+        res.send(replacement);
     }
 }

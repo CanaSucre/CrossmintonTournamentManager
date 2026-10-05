@@ -518,7 +518,7 @@ const getPoolScore = (idTournoi) => {
             statut
         FROM players pl
         INNER JOIN matchs m
-            ON player1 = p AND m.round = pl.round AND m.category = pl.category
+            ON player1 = p AND m.round = pl.round AND m.category = pl.category AND m.idTournoi = pl.idTournoi
         WHERE pl.idTournoi = ?;
     `;
 

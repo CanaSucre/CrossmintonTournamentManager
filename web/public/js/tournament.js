@@ -67,7 +67,6 @@ socket.on("updateMatchScore", (data) => {
         applyFiltersAndSorting();
         loadStatBar();
     } else {
-        console.log(data);
         tournamentDatas.matchs.push({
             idMatch: data.matchId,
             round: data.round,
