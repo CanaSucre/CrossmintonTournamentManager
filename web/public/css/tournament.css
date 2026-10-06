@@ -1,5 +1,9 @@
-#actionBar, #statBar, #matchesList {
+#actionBar, #statBar, #matchesList, #modeRecupTels {
     background-color: #2A2A3D;
+}
+
+input[id^="linkMatchWithId_"] {
+    width: 50%;
 }
 
 .colorMatch-0 {

@@ -6,6 +6,8 @@ const csvManager = require("../managers/csvManager");
 
 const logger = require("../managers/logManager");
 
+const config = require("../../config");
+
 module.exports = {
     namespace: /^\/tournament\/\d+$/,
     event: "connection",
@@ -22,11 +24,15 @@ module.exports = {
         }
 
         let liveTournamentId = databaseManager.getSetting("live_tournament");
+        let modeAttributionScore = databaseManager.getSetting("mode_attribution_score"); // Si on récupère depuis des serveurs différents ou un unique où on défini le N° de match par terrain à la main
 
         socketServ.of(`/tournament/${tournamentId}`).emit("load", {
             ...databaseManager.getTournamentDatas(tournamentId),
             isLive: liveTournamentId && liveTournamentId == tournamentId ? true: false,
-            liveEnabled: liveTournamentId ? true: false
+            liveEnabled: liveTournamentId ? true: false,
+            modeAttributionScore: modeAttributionScore,
+            startPort: config.PORT_ECOUTE,
+            ipAddress: config.IP_ADRESS_RESEAU,
         });
 
 
@@ -40,11 +46,7 @@ module.exports = {
                 try {
                     serverReceptionManager.startReceptionServer(tournamentDatas.tournamentInfos.nombreTerrains);
 
-                    socketServ.of(`/tournament/${tournamentId}`).emit("reload", {
-                        ...tournamentDatas,
-                        isLive: true,
-                        liveEnabled: true
-                    });
+                    sendReload();
 
                     callback(true)
                 } catch (error) {
@@ -57,11 +59,7 @@ module.exports = {
                 try {
                     serverReceptionManager.closeReceptionServer();
 
-                    socketServ.of(`/tournament/${tournamentId}`).emit("reload", {
-                        ...tournamentDatas,
-                        isLive: false,
-                        liveEnabled: false
-                    });
+                    sendReload();
 
                     callback(true);
                 } catch {
@@ -81,11 +79,7 @@ module.exports = {
 
             liveTournamentId = databaseManager.getSetting("live_tournament");
 
-            socketServ.of(`/tournament/${tournamentId}`).emit("reload", {
-                ...databaseManager.getTournamentDatas(tournamentId),
-                isLive: liveTournamentId && liveTournamentId == tournamentId ? true: false,
-                liveEnabled: liveTournamentId ? true: false
-            });
+            sendReload();
         });
 
         socket.on("loadMatchs", data => {
@@ -96,11 +90,7 @@ module.exports = {
 
                 liveTournamentId = databaseManager.getSetting("live_tournament");
 
-                socketServ.of(`/tournament/${tournamentId}`).emit("reload", {
-                    ...databaseManager.getTournamentDatas(tournamentId),
-                    isLive: liveTournamentId && liveTournamentId == tournamentId ? true: false,
-                    liveEnabled: liveTournamentId ? true: false
-                });
+                sendReload();
             } catch (error) {
                 logger.error(`Erreur lors du parsing des matchs CSV : ${error.message}`);
             }
@@ -112,11 +102,32 @@ module.exports = {
 
             liveTournamentId = databaseManager.getSetting("live_tournament");
 
+            sendReload();
+        });
+
+        socket.on("toggleLinkMatchWithId", () => {
+            let modeAttributionScore = databaseManager.getSetting("mode_attribution_score");
+
+            if (modeAttributionScore === "automatic") {
+                databaseManager.updateSetting("mode_attribution_score", "manual");
+                sendReload();
+            } else {
+                databaseManager.updateSetting("mode_attribution_score", "automatic");
+                sendReload();
+            }
+        });
+
+
+        const sendReload = () => {
+            liveTournamentId = databaseManager.getSetting("live_tournament");
             socketServ.of(`/tournament/${tournamentId}`).emit("reload", {
                 ...databaseManager.getTournamentDatas(tournamentId),
                 isLive: liveTournamentId && liveTournamentId == tournamentId ? true: false,
-                liveEnabled: liveTournamentId ? true: false
+                liveEnabled: liveTournamentId ? true: false,
+                modeAttributionScore: databaseManager.getSetting("mode_attribution_score"),
+                startPort: config.PORT_ECOUTE,
+                ipAddress: config.IP_ADRESS_RESEAU,
             });
-        });
+        };
     }
 }

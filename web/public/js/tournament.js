@@ -200,7 +200,11 @@ function countPlayedMatches() {
  */
 function loadTournamentDatas() {
     let title = document.getElementById("tournamentName");
-    title.innerText = tournamentDatas.tournamentInfos.nomTournoi;
+    let date = tournamentDatas.tournamentInfos.dateTournoi;
+
+    let dateFormat = new Date(date.split("/").reverse().join("-"));
+
+    title.innerText = tournamentDatas.tournamentInfos.nomTournoi + " | " + dateFormat.toLocaleDateString();
 
     loadActionBarButtons(tournamentDatas);
     loadStatBar(tournamentDatas);
@@ -217,6 +221,48 @@ function loadTournamentDatas() {
         option.text = category;
         categoryFilterSelect.appendChild(option);
     });
+
+    placeInputToLinkMatchWithId();
+}
+
+function placeInputToLinkMatchWithId() {
+    let modeRecupTelsDiv = document.getElementById("modeRecupTelsContent");
+    modeRecupTelsDiv.innerHTML = ""; // Clear previous inputs
+
+    let isOff = !tournamentDatas.isLive ||
+                tournamentDatas.tournamentInfos.status !== "Ongoing";
+
+    let valSwitch = document.getElementById("flexSwitchCheckDefault");
+    valSwitch.disabled = isOff;
+    valSwitch.checked = tournamentDatas.modeAttributionScore === "manual" ? true : false;
+
+    let isAutomatic = isOff || tournamentDatas.modeAttributionScore === "automatic" ? true : false;
+
+    for (let i = 0; i < tournamentDatas.tournamentInfos.nombreTerrains; i++) {
+        let div = document.createElement("div");
+        div.classList.add("d-flex", "align-items-start", "gap-3", "align-items-center");
+
+        let label = document.createElement("p");
+        label.innerText = `Terrain ${i + 1} :`;
+
+        let input = document.createElement("input");
+        input.type = isAutomatic ? "text" : "number";
+        input.id = `linkMatchWithId_${i + 1}`;
+        input.classList.add("form-control", "mb-2");
+        
+        if (isAutomatic) {
+            input.value = "";
+            input.placeholder = `${tournamentDatas.ipAddress}:${tournamentDatas.startPort + i}`;
+        } else {
+            input.value = 0;
+        }
+
+        input.disabled = isAutomatic ? true : false;
+        
+        div.appendChild(label);
+        div.appendChild(input);
+        modeRecupTelsDiv.appendChild(div);
+    }
 }
 
 
@@ -505,6 +551,10 @@ document.getElementById('confirmForm').addEventListener('submit', function (even
     const modal = bootstrap.Modal.getInstance(document.getElementById('confirmModal'));
 
     modal.hide();
+});
+
+document.getElementById('flexSwitchCheckDefault').addEventListener('change', function (event) {
+    socket.emit('toggleLinkMatchWithId');
 });
 
 /**
