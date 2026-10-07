@@ -47,12 +47,19 @@ socket.on('updateMatch', (updatedMatch) => {
     renderMatchList();
 })
 
+function getCategoryList() {
+    let categories = new Set(tournamentMatchs.map(match => match.category));
 
+    categories = Array.from(categories).sort();
+    return categories;
+}
 
 function renderMatchList() {
     const matchListContainer = document.getElementById('matchListContainer');
     matchListContainer.innerHTML = '';
 
+    let categoriesColor = {};
+    getCategoryList().forEach((category, index) => categoriesColor[category] = index);
 
     for (let i = 0; i < tournamentMatchs.length; i++) {
 
@@ -62,7 +69,7 @@ function renderMatchList() {
 
         matchListContainer.innerHTML += `
             <div class="matchEntrie">
-                <div class="d-flex justify-content-between" id="match-${match.idMatch}">
+                <div class="d-flex justify-content-between colorMatch-${categoriesColor[match.category]}" id="match-${match.idMatch}">
                     <span>
                         <i class="${icon} ${STATUS_COLOR[match.statut]}"></i>
                         N°${match.idMatch} | ${match.category} - ${match.round} | ${match.player1} - ${match.player2}
