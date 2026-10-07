@@ -43,6 +43,15 @@ socket.on("reload", (data) => {
     loadTournamentDatas();
 });
 
+socket.on("updateMatchOnField", (data) => {
+    if (tournamentDatas.modeAttributionScore === "automatic") return; // Ignore if in automatic mode
+
+    const { fieldNumber, matchId } = data;
+
+    let fieldInput = document.getElementById(`linkMatchWithId_${fieldNumber}`);
+
+    if (fieldInput) fieldInput.value = matchId;
+})
 
 socket.on("updateMatchScore", (data) => {
     // Met à jour les données du match dans le tableau des matchs
@@ -111,6 +120,15 @@ document.getElementById("matchSort").addEventListener("change", (event) => {
 document.getElementById('matchListTitle').setAttribute("href", `/tournament/${tournamentId}/matchList`);
 document.getElementById('matchListTitle').setAttribute("target", "_blank");
 
+document.addEventListener('change', function (event) {
+    const input = event.target;
+    if (!input.matches('input[id^="linkMatchWithId_"]')) return;
+
+    const fieldNumber = parseInt(input.id.split('_')[1]);
+    const matchId = parseInt(input.value);
+
+    socket.emit('linkMatchWithId', { fieldNumber, matchId });
+});
 
 /**
  * Applique les filtres et le tri aux données du tournoi
@@ -213,6 +231,7 @@ function loadTournamentDatas() {
 
     // Remplir les options de filtre par catégorie
     let categoryFilterSelect = document.getElementById("matchFilter_category");
+    categoryFilterSelect.innerHTML = `<option value="all">Toutes les catégories</option>`;
     let categories = getCategoryList();
 
     categories.forEach((category, index) => {
