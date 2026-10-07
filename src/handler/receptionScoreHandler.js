@@ -50,10 +50,10 @@ DATAS :
  * Gère la réception d'un score depuis l'application via une requête http
  * @param {request} req Requête entrante
  * @param {response} res Réponse sortante
- * @param {Integer} field Numéro du terrain d'où provient la requête
+ * @param {Integer} port Numéro du terrain d'où provient la requête
  */
-const handleScoreReception = (req, res, field) => {
-  logger.info(`Réception d'une requête de score sur le terrain #${field} depuis l'IP ${req.socket.remoteAddress} sur le port ${req.socket.localPort}. ${req.method} ${req.url}`, true);
+const handleScoreReception = (req, res, port) => {
+  logger.info(`Réception d'une requête de score sur le terrain #${port} depuis l'IP ${req.socket.remoteAddress} sur le port ${req.socket.localPort}. ${req.method} ${req.url}`, true);
 
   if (req.method === 'POST') {
     let body = [];
@@ -66,14 +66,22 @@ const handleScoreReception = (req, res, field) => {
       body = Buffer.concat(body).toString();
       const data = querystring.parse(body);
 
-      logger.info(`Données reçues sur le terrain #${field} : ${JSON.stringify(data)}`, true);
+      logger.info(`Données reçues sur le port #${port} : ${JSON.stringify(data)}`, true);
 
       
       data.numMatch = data.numMatch.replaceAll('"', "");
       
       if (data.player2) data.player2 = data.player2.replaceAll('"', "");
       
-      if (checkDataValidity(data, field)) {
+      if (checkDataValidity(data, port)) {
+        let field = getField(data.numMatch, port)
+        if (!field) {
+          logger.error(`Impossible de déterminer le terrain pour le match n°${data.numMatch}.`);
+          res.writeHead(200, { 'Content-Type': 'text/plain' });
+          res.end('Score received successfully, but no field found, this data will not be processed.\n');
+          return;
+        }
+
         processData(data, field);
 
         res.writeHead(200, { 'Content-Type': 'text/plain' });
@@ -90,13 +98,23 @@ const handleScoreReception = (req, res, field) => {
   }
 }
 
+
+const getField = (matchId, port) => {
+  if (dbManager.getSetting("mode_attribution_score") === "automatic") {
+    return port;
+  } else {
+    let currentTournament = dbManager.getSetting("live_tournament");
+    
+    let floor = dbManager.getMatchFloorInSetting(currentTournament, matchId);
+    return floor;
+  }
+}
+
 const processData = async (data, field) => {
   // Tournament ID :
   let currentTournament = dbManager.getSetting("live_tournament");
-  let tournamentDatas = dbManager.getTournamentDatas(currentTournament);
 
-  let tournamentDb = dbManager.loadDatabase(tournamentDatas.tournamentInfos.databaseName);
-  let matchDatas = dbManager.getMatchDatas(tournamentDb, data.numMatch);
+  let matchDatas = dbManager.getMatchDatas(currentTournament, data.numMatch);
 
   // Si le match n'existe pas encore dans la BDD, on le crée.
   // Cela permet de ne pas devoir créer tous les matchs à l'avance et de gérer les phases
@@ -105,21 +123,21 @@ const processData = async (data, field) => {
   if (unknownMatch) {
 
     // TODO : Adapter au nouveau fonctionnement de la DB
-    await dbManager.registerMatchs(
-      tournamentDb,
+    dbManager.registerMatchs(
+      currentTournament,
       [
         [ data.numMatch, data.round, data.category, data.player1, data.player2 ]
       ]
     )
 
-    matchDatas = dbManager.getMatchDatas(tournamentDb, data.numMatch);
+    matchDatas = dbManager.getMatchDatas(currentTournament, data.numMatch);
   }
 
   // Si le match n'est pas encore en cours, on le met en cours et on indique le terrain
   // TODO : Check si le match est déjà terminé, dans ce cas ne pas modifier le statut et ne pas mettre à jour le terrain (pour éviter les fraudes)
   if (matchDatas.statut != MatchStatus.IN_PROGRESS) {
-    dbManager.updateMatchStatus(tournamentDb, data.numMatch, MatchStatus.IN_PROGRESS);
-    dbManager.updateMatchField(tournamentDb, data.numMatch, field);
+    dbManager.updateMatchStatus(currentTournament, data.numMatch, MatchStatus.IN_PROGRESS);
+    dbManager.updateMatchField(currentTournament, data.numMatch, field);
   }
 
   let score = {
@@ -133,12 +151,12 @@ const processData = async (data, field) => {
     player2Set3: data.player2Set3,
   };
 
-  dbManager.updateMatchScore(tournamentDb, data.numMatch, score);
+  dbManager.updateMatchScore(currentTournament, data.numMatch, score);
 
   let matchWinner = getMatchWinner(data);
   if (matchWinner) {
-    dbManager.updateMatchStatus(tournamentDb, data.numMatch, MatchStatus.COMPLETED);
-    dbManager.updateMatchWinner(tournamentDb, data.numMatch, matchWinner);
+    dbManager.updateMatchStatus(currentTournament, data.numMatch, MatchStatus.COMPLETED);
+    dbManager.updateMatchWinner(currentTournament, data.numMatch, matchWinner);
   }
 
   const socketServ = websocketManager.getWebsocketServer();

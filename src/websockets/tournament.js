@@ -129,7 +129,8 @@ module.exports = {
 
             console.log(`Linking match ID ${matchId} to field number ${fieldNumber} for tournament ID ${tournamentId}`);
 
-            databaseManager.updateSetting(`match_on_field_${fieldNumber}`, matchId);
+            let stringMatchId = String(matchId);
+            databaseManager.updateSetting(`match_on_field_${fieldNumber}`, stringMatchId);
 
             socketServ.of(`/tournament/${tournamentId}`).emit('updateMatchOnField', {
                 fieldNumber,

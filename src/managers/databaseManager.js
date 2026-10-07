@@ -346,7 +346,7 @@ const updateMatchStatus = (idTournoi, matchId, status) => {
 
     let updateStatus = `UPDATE matchs SET statut = ? WHERE idMatch = ? AND idTournoi = ?;`;
 
-    db.prepare(updateStatus).run(status, matchId, idTournoi);
+    getDatabase().prepare(updateStatus).run(status, matchId, idTournoi);
 };
 
 
@@ -356,7 +356,7 @@ const updateMatchStatus = (idTournoi, matchId, status) => {
  * @param {int} matchId 
  * @param {int} field 
  */
-const updateMatchField = (iTournoi, matchId, field) => {
+const updateMatchField = (idTournoi, matchId, field) => {
     if (matchId <= 0 || isNaN(matchId)) {
         throw new Error(`ID de match invalide : ${matchId}`);
     }
@@ -373,7 +373,7 @@ const updateMatchField = (iTournoi, matchId, field) => {
 
     let updateField = `UPDATE matchs SET field = ? WHERE idMatch = ? AND idTournoi = ?;`;
 
-    db.prepare(updateField).run(field, matchId, idTournoi);
+    getDatabase().prepare(updateField).run(field, matchId, idTournoi);
 }
 
 
@@ -391,7 +391,7 @@ const getMatchDatas = (idTournoi, matchId) => {
 
     let getStatus = `SELECT * FROM matchs WHERE idMatch = ? AND idTournoi = ?;`;
 
-    let row = db.prepare(getStatus).get(matchId, idTournoi);
+    let row = getDatabase().prepare(getStatus).get(matchId, idTournoi);
 
     if (row) {
         return row;
@@ -422,7 +422,7 @@ const updateMatchScore = (idTournoi, matchId, score) => {
         player1Set3 = ?, player2Set3 = ? 
     WHERE idMatch = ? AND idTournoi = ?;`;
 
-    db.prepare(updateScore).run(
+    getDatabase().prepare(updateScore).run(
         score.player1Set1, score.player2Set1,
         score.player1Set2, score.player2Set2,
         score.player1Set3, score.player2Set3,
@@ -560,6 +560,22 @@ const getBracketsMatchsOfCategory = (idTournoi, category) => {
 };
 
 
+const getMatchFloorInSetting = (idTournoi, matchId) => {
+    let request = `SELECT * FROM ${MAIN_DB_SETTINGS_TABLE} WHERE key LIKE 'match%' AND value = ?;`;
+
+    let result = getDatabase().prepare(request).get(matchId);
+
+
+    if (result) {
+        let key = result.key;
+        let floor = parseInt(key.split('_')[3]);
+        return floor;
+    } else {
+        return null;
+    }
+}
+
+
 module.exports = {
     getDatabase,
     createDatabase,
@@ -582,4 +598,5 @@ module.exports = {
     getPools,
     getPoolScore,
     getBracketsMatchsOfCategory,
+    getMatchFloorInSetting,
 }
