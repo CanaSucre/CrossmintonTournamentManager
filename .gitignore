@@ -9,3 +9,5 @@ web/public/bootstrap/
 logs/
 
 dbTest/
+
+sendDatas.js

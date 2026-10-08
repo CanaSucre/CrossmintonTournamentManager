@@ -156,7 +156,6 @@ const processData = async (data, field) => {
   let matchWinner = getMatchWinner(data);
   if (matchWinner) {
     dbManager.updateMatchStatus(currentTournament, data.numMatch, MatchStatus.COMPLETED);
-    dbManager.updateMatchWinner(currentTournament, data.numMatch, matchWinner);
   }
 
   const socketServ = websocketManager.getWebsocketServer();
@@ -254,6 +253,4 @@ module.exports = {
   handleScoreReception,
   checkDataValidity,
   checkApero,
-  getMatchWinner,
-  getSetWinner,
 };

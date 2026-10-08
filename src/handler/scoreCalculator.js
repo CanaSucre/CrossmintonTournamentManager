@@ -15,6 +15,10 @@ const { MatchStatus } = require('../enums/MatchStatus');
 // ------------------------ //
 
 const getSetWinner = (player1Score, player2Score) => {
+  if (typeof player1Score === 'string') player1Score = parseInt(player1Score);
+  if (typeof player2Score === 'string') player2Score = parseInt(player2Score);
+
+
   if (player1Score == '' || player2Score == '') {
     // Set pas encore joué
     return null;
