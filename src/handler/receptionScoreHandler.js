@@ -234,18 +234,19 @@ const checkDataValidity = (data, field, isTest = false) => {
 }
 
 const checkApero = (data) => {
+  
   if (
     data.player1Set1 == 0 && data.player2Set1 == 7 ||
     data.player1Set2 == 0 && data.player2Set2 == 7 ||
     data.player1Set3 == 0 && data.player2Set3 == 7
   ) {
-    logger.warning(`APERO ! Match n°${data.numMatch} : ${data.player2} a mis un 7-0 à ${data.player1} sur le terrain ${field}.`);
+    logger.warning(`APERO ! Match n°${data.numMatch} : ${data.player2} a mis un 7-0 à ${data.player1}.`);
   } else if (
     data.player1Set1 == 7 && data.player2Set1 == 0 ||
     data.player1Set2 == 7 && data.player2Set2 == 0 ||
     data.player1Set3 == 7 && data.player2Set3 == 0
   ) {
-    logger.warning(`APERO ! Match n°${data.numMatch} : ${data.player1} a mis un 7-0 à ${data.player2} sur le terrain ${field}.`);
+    logger.warning(`APERO ! Match n°${data.numMatch} : ${data.player1} a mis un 7-0 à ${data.player2}.`);
   }
 }
 
